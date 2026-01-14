@@ -1,0 +1,1438 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>达宝 - 官方应援网站</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1', // 主色调：紫色
+                        secondary: '#ec4899', // 辅助色：粉色
+                        dark: '#1e1b4b', // 深色
+                        light: '#f5f3ff', // 浅色
+                        accent: '#8b5cf6', // 强调色
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .text-shadow-lg {
+                text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+            .bg-gradient-primary {
+                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            }
+            .bg-gradient-secondary {
+                background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+            }
+            .glass {
+                background: rgba(255, 255, 255, 0.25);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
+            .glass-dark {
+                background: rgba(30, 27, 75, 0.75);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+            }
+            .star {
+                position: absolute;
+                background-color: white;
+                border-radius: 50%;
+                animation: twinkle 4s infinite ease-in-out;
+            }
+            @keyframes twinkle {
+                0%, 100% { opacity: 0.2; transform: scale(0.8); }
+                50% { opacity: 1; transform: scale(1.2); }
+            }
+            .music-note {
+                animation: bounce 2s infinite ease-in-out;
+            }
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+            }
+            .nav-link {
+                position: relative;
+            }
+            .nav-link::after {
+                content: '';
+                position: absolute;
+                width: 0;
+                height: 2px;
+                bottom: -2px;
+                left: 0;
+                background-color: #ec4899;
+                transition: width 0.3s ease;
+            }
+            .nav-link:hover::after,
+            .nav-link.active::after {
+                width: 100%;
+            }
+            .song-item {
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            .song-item:hover {
+                background-color: rgba(99, 102, 241, 0.2);
+                transform: translateX(5px);
+            }
+            .song-item.selected {
+                background-color: rgba(236, 72, 153, 0.3);
+                border-left: 4px solid #ec4899;
+            }
+            .request-card {
+                transition: all 0.3s ease;
+            }
+            .request-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.3);
+            }
+            .top-song {
+                position: relative;
+            }
+            .top-song::before {
+                content: attr(data-rank);
+                position: absolute;
+                left: -25px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: rgba(255, 255, 255, 0.3);
+            }
+            .top-song.top-3::before {
+                color: #ec4899;
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-dark to-gray-900 text-light min-h-screen">
+    <!-- 背景星星 -->
+    <div id="stars-container" class="fixed inset-0 pointer-events-none"></div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-dark">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">达</span>
+                </div>
+                <h1 class="text-xl font-bold text-white">达宝<span class="text-secondary">应援站</span></h1>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#home" class="nav-link text-white hover:text-secondary transition-colors active">首页</a>
+                <a href="#songs" class="nav-link text-white hover:text-secondary transition-colors">歌单</a>
+                <a href="#request" class="nav-link text-white hover:text-secondary transition-colors">点歌</a>
+                <a href="#about" class="nav-link text-white hover:text-secondary transition-colors">关于</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-white text-2xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden glass-dark w-full">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#home" class="text-white hover:text-secondary transition-colors py-2 mobile-nav-link">首页</a>
+                <a href="#songs" class="text-white hover:text-secondary transition-colors py-2 mobile-nav-link">歌单</a>
+                <a href="#request" class="text-white hover:text-secondary transition-colors py-2 mobile-nav-link">点歌</a>
+                <a href="#about" class="text-white hover:text-secondary transition-colors py-2 mobile-nav-link">关于</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main>
+        <!-- 首页/英雄区 -->
+        <section id="home" class="min-h-screen pt-24 pb-16 flex items-center relative overflow-hidden">
+            <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 z-10 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-6xl font-bold mb-4 text-shadow-lg">
+                        <span class="text-white">达宝</span>
+                        <span class="text-secondary">Idol</span>
+                    </h1>
+                    <p class="text-xl md:text-2xl mb-8 text-gray-300 max-w-lg">
+                        用歌声传递希望与梦想的二次元偶像，与你一起创造无限可能！
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#songs" class="bg-gradient-primary hover:opacity-90 text-white font-bold py-3 px-6 rounded-full transition-all transform hover:scale-105 shadow-lg">
+                            <i class="fa fa-music mr-2"></i> 查看歌单
+                        </a>
+                        <a href="#request" class="bg-transparent border-2 border-secondary hover:bg-secondary hover:bg-opacity-20 text-secondary font-bold py-3 px-6 rounded-full transition-all transform hover:scale-105">
+                            <i class="fa fa-star mr-2"></i> 点歌应援
+                        </a>
+                    </div>
+                    <div class="mt-12 flex items-center space-x-6">
+                        <div class="flex flex-col items-center">
+                            <span class="text-3xl font-bold text-white">1.2M+</span>
+                            <span class="text-gray-400">粉丝</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-3xl font-bold text-white">400+</span>
+                            <span class="text-gray-400">歌曲</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-3xl font-bold text-white">50M+</span>
+                            <span class="text-gray-400">播放量</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center relative">
+                    <div class="relative w-[300px] h-[600px] md:w-[400px] md:h-[800px] animate-float">
+                        <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/ae7a70198c1c47ca95c1f3effbfe7fb8.png~tplv-a9rns2rl98-24:720:720.png?lk3s=8e244e95&amp;rcl=20260114150400B64CA8DDC1FE0615B10E&amp;rrcfp=8a172a1a&amp;x-expires=1768979041&amp;x-signature=u%2BH7JrKmzgRgQV%2Bkom63ejvJ49Q%3D" alt="达宝立绘" class="w-full h-full object-contain z-20 relative">
+                        <div class="absolute inset-0 bg-gradient-radial from-primary/30 to-transparent rounded-full filter blur-3xl z-10"></div>
+                        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-secondary/30 rounded-full filter blur-3xl animate-pulse-slow"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+                <a href="#songs" class="text-white text-3xl">
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- 歌单区域 -->
+        <section id="songs" class="py-20 relative">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-4 text-shadow-lg">
+                        <span class="text-white">全部</span>
+                        <span class="text-secondary">歌单</span>
+                    </h2>
+                    <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                        点击歌曲名称即可为达宝点歌，支持搜索和分类筛选
+                    </p>
+                </div>
+
+                <div class="mb-8">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                        <div class="relative w-full md:w-1/3">
+                            <input type="text" id="search-input" placeholder="搜索歌曲..." class="bg-gray-800 bg-opacity-50 border border-gray-700 rounded-full py-3 px-4 pl-10 text-white focus:outline-none focus:ring-2 focus:ring-primary w-full">
+                            <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"></i>
+                        </div>
+                        <div class="flex flex-wrap gap-2 justify-center md:justify-end w-full md:w-2/3">
+                            <button class="category-btn bg-primary text-white py-2 px-4 rounded-full text-sm" data-category="all">全部歌曲</button>
+                            <button class="category-btn bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded-full text-sm" data-category="pop">流行</button>
+                            <button class="category-btn bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded-full text-sm" data-category="rap">说唱</button>
+                            <button class="category-btn bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded-full text-sm" data-category="special">整活</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-dark rounded-2xl p-6 shadow-xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-white">歌曲列表</h3>
+                            <div class="text-sm text-gray-400">
+                                共 <span id="song-count">0</span> 首歌曲
+                            </div>
+                        </div>
+                        <div class="overflow-y-auto max-h-[600px] pr-2" id="song-list-container">
+                            <div id="song-list" class="space-y-2">
+                                <!-- 歌曲列表将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 点歌区域 -->
+        <section id="request" class="py-20 relative bg-dark bg-opacity-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-4 text-shadow-lg">
+                        <span class="text-white">点歌</span>
+                        <span class="text-secondary">应援</span>
+                    </h2>
+                    <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                        为达宝点一首你喜爱的歌曲，让她用歌声回应你的支持与爱
+                    </p>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-10">
+                    <!-- 左侧点歌表单 -->
+                    <div class="lg:w-1/2">
+                        <div class="glass-dark rounded-2xl p-8 shadow-xl">
+                            <h3 class="text-2xl font-bold mb-6 text-white">点歌请求</h3>
+                            <form id="request-form" class="space-y-6">
+                                <div>
+                                    <label for="selected-song" class="block text-gray-300 mb-2">已选歌曲</label>
+                                    <div id="selected-song-display" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 text-white">
+                                        请从歌单中选择歌曲
+                                    </div>
+                                    <input type="hidden" id="selected-song" value="">
+                                </div>
+                                <div>
+                                    <label for="request-message" class="block text-gray-300 mb-2">点歌留言</label>
+                                    <textarea id="request-message" rows="4" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="写下你想对达宝说的话（可选）..."></textarea>
+                                </div>
+                                <button type="submit" id="submit-request" class="w-full bg-gradient-secondary hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-[1.02] shadow-lg" disabled="">
+                                    <i class="fa fa-paper-plane mr-2"></i> 提交点歌请求
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 右侧点歌排行榜 -->
+                    <div class="lg:w-1/2">
+                        <!-- 点歌榜 -->
+                        <div class="glass-dark rounded-2xl p-8 shadow-xl mb-8">
+                            <h3 class="text-2xl font-bold mb-6 text-white flex items-center">
+                                <i class="fa fa-trophy mr-2 text-yellow-400"></i> 点歌榜
+                            </h3>
+                            <div id="top-requests" class="space-y-4">
+                                <!-- 点歌榜将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+
+                        <!-- 最新点歌 -->
+                        <div class="glass-dark rounded-2xl p-8 shadow-xl">
+                            <h3 class="text-2xl font-bold mb-6 text-white flex items-center">
+                                <i class="fa fa-clock-o mr-2 text-secondary"></i> 最新点歌
+                            </h3>
+                            <div id="recent-requests" class="space-y-4">
+                                <!-- 最新点歌将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 关于区域 -->
+        <section id="about" class="py-20 relative">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-4 text-shadow-lg">
+                        <span class="text-white">关于</span>
+                        <span class="text-secondary">达宝</span>
+                    </h2>
+                    <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                        了解更多关于这位充满活力与梦想的二次元偶像
+                    </p>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-12 items-center">
+                    <div class="lg:w-1/3">
+                        <div class="relative w-64 h-64 mx-auto">
+                            <div class="absolute inset-0 bg-gradient-primary rounded-full filter blur-3xl opacity-70"></div>
+                            <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/code_assistant/5a42696bce9a4feba7a4ae8e8a0000ff~tplv-a9rns2rl98-image.image?lk3s=8e244e95&amp;rcl=2026011415154639A36D801A092634C61E&amp;rrcfp=e75484ac&amp;x-expires=1768979747&amp;x-signature=bF5UgbLDVZgKMP0TfCde2zFjjdU%3D" alt="达宝头像" class="w-full h-full object-cover rounded-full border-4 border-white relative z-10">
+                        </div>
+                    </div>
+                    <div class="lg:w-2/3">
+                        <div class="glass-dark rounded-2xl p-8 shadow-xl">
+                            <h3 class="text-2xl font-bold mb-4 text-white">偶像档案</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                <div>
+                                    <p class="text-gray-400">姓名</p>
+                                    <p class="text-white text-lg">达宝</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">生日</p>
+                                    <p class="text-white text-lg">12月26日</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">星座</p>
+                                    <p class="text-white text-lg">摩羯座</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">身高</p>
+                                    <p class="text-white text-lg">165cm</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">代表色</p>
+                                    <p class="text-white text-lg">紫色 (#6366f1)</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">粉丝名称</p>
+                                    <p class="text-white text-lg">猫狗鸡</p>
+                                </div>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4 text-white">个人简介</h3>
+                            <p class="text-gray-300 mb-6 leading-relaxed">
+                                达宝是一位充满活力与梦想的二次元偶像，以其独特的紫色头发和灵动的眼神著称。她热爱音乐，擅长将情感融入歌声，用音乐传递希望与梦想。作为一名新生代偶像，她不断挑战自我，尝试各种风格的音乐，希望能够用自己的歌声连接更多人的心灵。
+                            </p>
+                            <p class="text-gray-300 mb-6 leading-relaxed">
+                                达宝的音乐风格多样，从动感的快歌到抒情的慢歌，从流行金曲到说唱作品，她都能完美驾驭。她的代表作品包括《着魔》《微凉的心跳》《从不孤单》等，翻唱作品涵盖《大鱼》《赤伶》《漠河舞厅》等热门歌曲，累计翻唱歌曲400余首，深受粉丝喜爱。
+                            </p>
+                            <div class="flex space-x-4">
+                                <a href="#" class="bg-gray-800 hover:bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                                <a href="#" class="bg-gray-800 hover:bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                                    <i class="fa fa-instagram"></i>
+                                </a>
+                                <a href="#" class="bg-gray-800 hover:bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                                    <i class="fa fa-youtube-play"></i>
+                                </a>
+                                <a href="#" class="bg-gray-800 hover:bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                                    <i class="fa fa-bilibili"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark py-10">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">达</span>
+                        </div>
+                        <h2 class="text-lg font-bold text-white">达宝<span class="text-secondary">应援站</span></h2>
+                    </div>
+                    <p class="text-gray-400 mt-2">© 2025 达宝官方应援网站. 保留所有权利.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-instagram"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-youtube-play"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-bilibili"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-weibo"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+                <p>本网站仅供粉丝应援使用，所有内容均为虚构。</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden">
+        <div class="glass-dark rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-title" class="text-2xl font-bold text-white">标题</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-white">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="modal-content" class="text-gray-300">
+                <!-- 模态框内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 所有歌曲数据 - 从用户提供的歌单中提取
+        const allSongs = [
+            // 流行分类
+            { id: 1, name: "光", category: "pop", requestCount: 0 },
+            { id: 2, name: "鱼", category: "pop", requestCount: 0 },
+            { id: 3, name: "吻", category: "pop", requestCount: 0 },
+            { id: 4, name: "画", category: "pop", requestCount: 0 },
+            { id: 5, name: "囍", category: "pop", requestCount: 0 },
+            { id: 6, name: "椿", category: "pop", requestCount: 0 },
+            { id: 7, name: "火", category: "pop", requestCount: 0 },
+            { id: 8, name: "当", category: "pop", requestCount: 0 },
+            { id: 9, name: "爱", category: "pop", requestCount: 0 },
+            { id: 10, name: "常", category: "pop", requestCount: 0 },
+            { id: 11, name: "笼", category: "pop", requestCount: 0 },
+            { id: 12, name: "喂", category: "pop", requestCount: 0 },
+            { id: 13, name: "啊", category: "pop", requestCount: 0 },
+            { id: 14, name: "谪仙", category: "pop", requestCount: 0 },
+            { id: 15, name: "大眠", category: "pop", requestCount: 0 },
+            { id: 16, name: "箴言", category: "pop", requestCount: 0 },
+            { id: 17, name: "爱你", category: "pop", requestCount: 0 },
+            { id: 18, name: "重来", category: "pop", requestCount: 0 },
+            { id: 19, name: "阴天", category: "pop", requestCount: 0 },
+            { id: 20, name: "齐天", category: "pop", requestCount: 0 },
+            { id: 21, name: "微微", category: "pop", requestCount: 0 },
+            { id: 22, name: "解药", category: "pop", requestCount: 0 },
+            { id: 23, name: "流年", category: "pop", requestCount: 0 },
+            { id: 24, name: "天涯", category: "pop", requestCount: 0 },
+            { id: 25, name: "飘摇", category: "pop", requestCount: 0 },
+            { id: 26, name: "大鱼", category: "pop", requestCount: 0 },
+            { id: 27, name: "祈祷", category: "pop", requestCount: 0 },
+            { id: 28, name: "倒带", category: "pop", requestCount: 0 },
+            { id: 29, name: "风月", category: "pop", requestCount: 0 },
+            { id: 30, name: "千古", category: "pop", requestCount: 0 },
+            { id: 31, name: "舞娘", category: "pop", requestCount: 0 },
+            { id: 32, name: "不哭", category: "pop", requestCount: 0 },
+            { id: 33, name: "叶子", category: "pop", requestCount: 0 },
+            { id: 34, name: "倾城", category: "pop", requestCount: 0 },
+            { id: 35, name: "命运", category: "pop", requestCount: 0 },
+            { id: 36, name: "小小", category: "pop", requestCount: 0 },
+            { id: 37, name: "火苗", category: "pop", requestCount: 0 },
+            { id: 38, name: "心跳", category: "pop", requestCount: 0 },
+            { id: 39, name: "人间", category: "pop", requestCount: 0 },
+            { id: 40, name: "尽头", category: "pop", requestCount: 0 },
+            { id: 41, name: "后来", category: "pop", requestCount: 0 },
+            { id: 42, name: "喜欢", category: "pop", requestCount: 0 },
+            { id: 43, name: "放过", category: "pop", requestCount: 0 },
+            { id: 44, name: "成全", category: "pop", requestCount: 0 },
+            { id: 45, name: "宝贝", category: "pop", requestCount: 0 },
+            { id: 46, name: "雨蝶", category: "pop", requestCount: 0 },
+            { id: 47, name: "信仰", category: "pop", requestCount: 0 },
+            { id: 48, name: "稻香", category: "pop", requestCount: 0 },
+            { id: 49, name: "芊芊", category: "pop", requestCount: 0 },
+            { id: 50, name: "天后", category: "pop", requestCount: 0 },
+            { id: 51, name: "宁夏", category: "pop", requestCount: 0 },
+            { id: 52, name: "说谎", category: "pop", requestCount: 0 },
+            { id: 53, name: "暖暖", category: "pop", requestCount: 0 },
+            { id: 54, name: "画沙", category: "pop", requestCount: 0 },
+            { id: 55, name: "江南", category: "pop", requestCount: 0 },
+            { id: 56, name: "心墙", category: "pop", requestCount: 0 },
+            { id: 57, name: "皈依", category: "pop", requestCount: 0 },
+            { id: 58, name: "趁早", category: "pop", requestCount: 0 },
+            { id: 59, name: "演员", category: "pop", requestCount: 0 },
+            { id: 60, name: "沉溺", category: "pop", requestCount: 0 },
+            { id: 61, name: "消愁", category: "pop", requestCount: 0 },
+            { id: 62, name: "丝路", category: "pop", requestCount: 0 },
+            { id: 63, name: "月光", category: "pop", requestCount: 0 },
+            { id: 64, name: "红颜", category: "pop", requestCount: 0 },
+            { id: 65, name: "洋葱", category: "pop", requestCount: 0 },
+            { id: 66, name: "芒种", category: "pop", requestCount: 0 },
+            { id: 67, name: "彩虹", category: "pop", requestCount: 0 },
+            { id: 68, name: "撒野", category: "pop", requestCount: 0 },
+            { id: 69, name: "年轮", category: "pop", requestCount: 0 },
+            { id: 70, name: "李白", category: "pop", requestCount: 0 },
+            { id: 71, name: "红豆", category: "pop", requestCount: 0 },
+            { id: 72, name: "答案", category: "pop", requestCount: 0 },
+            { id: 73, name: "逆战", category: "pop", requestCount: 0 },
+            { id: 74, name: "走马", category: "pop", requestCount: 0 },
+            { id: 75, name: "暧昧", category: "pop", requestCount: 0 },
+            { id: 76, name: "触电", category: "pop", requestCount: 0 },
+            { id: 77, name: "囚鸟", category: "pop", requestCount: 0 },
+            { id: 78, name: "听海", category: "pop", requestCount: 0 },
+            { id: 79, name: "花火", category: "pop", requestCount: 0 },
+            { id: 80, name: "纪念", category: "pop", requestCount: 0 },
+            { id: 81, name: "传奇", category: "pop", requestCount: 0 },
+            { id: 82, name: "不染", category: "pop", requestCount: 0 },
+            { id: 83, name: "自洽", category: "pop", requestCount: 0 },
+            { id: 84, name: "禁区", category: "pop", requestCount: 0 },
+            { id: 85, name: "Andy", category: "pop", requestCount: 0 },
+            { id: 86, name: "够爱", category: "pop", requestCount: 0 },
+            { id: 87, name: "月下", category: "pop", requestCount: 0 },
+            { id: 88, name: "是你", category: "pop", requestCount: 0 },
+            { id: 89, name: "再见", category: "pop", requestCount: 0 },
+            { id: 90, name: "赤伶", category: "pop", requestCount: 0 },
+            { id: 91, name: "摆渡", category: "pop", requestCount: 0 },
+            { id: 92, name: "山川", category: "pop", requestCount: 0 },
+            { id: 93, name: "无期", category: "pop", requestCount: 0 },
+            { id: 94, name: "怀念", category: "pop", requestCount: 0 },
+            { id: 95, name: "红黑", category: "pop", requestCount: 0 },
+            { id: 96, name: "人质", category: "pop", requestCount: 0 },
+            { id: 97, name: "浮白", category: "pop", requestCount: 0 },
+            { id: 98, name: "假装", category: "pop", requestCount: 0 },
+            { id: 99, name: "说客", category: "pop", requestCount: 0 },
+            { id: 100, name: "聊生", category: "pop", requestCount: 0 },
+            { id: 101, name: "愿望", category: "pop", requestCount: 0 },
+            { id: 102, name: "杀手", category: "pop", requestCount: 0 },
+            { id: 103, name: "晚婚", category: "pop", requestCount: 0 },
+            { id: 104, name: "活该", category: "pop", requestCount: 0 },
+            { id: 105, name: "爱情", category: "pop", requestCount: 0 },
+            { id: 106, name: "狐言", category: "pop", requestCount: 0 },
+            { id: 107, name: "哦想", category: "pop", requestCount: 0 },
+            { id: 108, name: "早春", category: "pop", requestCount: 0 },
+            { id: 109, name: "问风", category: "pop", requestCount: 0 },
+            { id: 110, name: "失忆", category: "pop", requestCount: 0 },
+            { id: 111, name: "悬溺", category: "pop", requestCount: 0 },
+            { id: 112, name: "不留", category: "pop", requestCount: 0 },
+            { id: 113, name: "如此", category: "pop", requestCount: 0 },
+            { id: 114, name: "精卫", category: "pop", requestCount: 0 },
+            { id: 115, name: "幻听", category: "pop", requestCount: 0 },
+            { id: 116, name: "循迹", category: "pop", requestCount: 0 },
+            { id: 117, name: "你走", category: "pop", requestCount: 0 },
+            { id: 118, name: "拥抱", category: "pop", requestCount: 0 },
+            { id: 119, name: "Amen", category: "pop", requestCount: 0 },
+            { id: 120, name: "离人", category: "pop", requestCount: 0 },
+            { id: 121, name: "空心", category: "pop", requestCount: 0 },
+            { id: 122, name: "心空", category: "pop", requestCount: 0 },
+            { id: 123, name: "叮咚", category: "pop", requestCount: 0 },
+            { id: 124, name: "放开", category: "pop", requestCount: 0 },
+            { id: 125, name: "用情", category: "pop", requestCount: 0 },
+            { id: 126, name: "蠢货", category: "pop", requestCount: 0 },
+            { id: 127, name: "青花", category: "pop", requestCount: 0 },
+            { id: 128, name: "冻夏", category: "pop", requestCount: 0 },
+            { id: 129, name: "夜车", category: "pop", requestCount: 0 },
+            { id: 130, name: "楼顶", category: "pop", requestCount: 0 },
+            { id: 131, name: "出卖", category: "pop", requestCount: 0 },
+            { id: 132, name: "骑士", category: "pop", requestCount: 0 },
+            { id: 133, name: "岁岁", category: "pop", requestCount: 0 },
+            { id: 134, name: "怪病", category: "pop", requestCount: 0 },
+            { id: 135, name: "乐园", category: "pop", requestCount: 0 },
+            { id: 136, name: "不得", category: "pop", requestCount: 0 },
+            { id: 137, name: "恋人", category: "pop", requestCount: 0 },
+            { id: 138, name: "阿妮", category: "pop", requestCount: 0 },
+            { id: 139, name: "时差", category: "pop", requestCount: 0 },
+            { id: 140, name: "沟壑", category: "pop", requestCount: 0 },
+            { id: 141, name: "侧脸", category: "pop", requestCount: 0 },
+            { id: 142, name: "过客", category: "pop", requestCount: 0 },
+            { id: 143, name: "对影", category: "pop", requestCount: 0 },
+            { id: 144, name: "大桥", category: "pop", requestCount: 0 },
+            { id: 145, name: "纹身", category: "pop", requestCount: 0 },
+            { id: 146, name: "忧愁", category: "pop", requestCount: 0 },
+            { id: 147, name: "挚友", category: "pop", requestCount: 0 },
+            { id: 148, name: "保留", category: "pop", requestCount: 0 },
+            { id: 149, name: "占有", category: "pop", requestCount: 0 },
+            { id: 150, name: "戒你", category: "pop", requestCount: 0 },
+            { id: 151, name: "仗着", category: "pop", requestCount: 0 },
+            { id: 152, name: "勉强", category: "pop", requestCount: 0 },
+            { id: 153, name: "棕旨", category: "pop", requestCount: 0 },
+            { id: 154, name: "窄门", category: "pop", requestCount: 0 },
+            { id: 155, name: "千年", category: "pop", requestCount: 0 },
+            { id: 156, name: "多嘴", category: "pop", requestCount: 0 },
+            { id: 157, name: "恰好", category: "pop", requestCount: 0 },
+            { id: 158, name: "嗵嗵", category: "pop", requestCount: 0 },
+            { id: 159, name: "太空", category: "pop", requestCount: 0 },
+            { id: 160, name: "春风吹", category: "pop", requestCount: 0 },
+            { id: 161, name: "多情岸", category: "pop", requestCount: 0 },
+            { id: 162, name: "天下局", category: "pop", requestCount: 0 },
+            { id: 163, name: "达尔文", category: "pop", requestCount: 0 },
+            { id: 164, name: "外婆桥", category: "pop", requestCount: 0 },
+            { id: 165, name: "广寒谣", category: "pop", requestCount: 0 },
+            { id: 166, name: "寄明月", category: "pop", requestCount: 0 },
+            { id: 167, name: "童话镇", category: "pop", requestCount: 0 },
+            { id: 168, name: "带我走", category: "pop", requestCount: 0 },
+            { id: 169, name: "云与海", category: "pop", requestCount: 0 },
+            { id: 170, name: "就是我", category: "pop", requestCount: 0 },
+            { id: 171, name: "鱼玄机", category: "pop", requestCount: 0 },
+            { id: 172, name: "小永远", category: "pop", requestCount: 0 },
+            { id: 173, name: "欧若拉", category: "pop", requestCount: 0 },
+            { id: 174, name: "万物生", category: "pop", requestCount: 0 },
+            { id: 175, name: "大丈夫", category: "pop", requestCount: 0 },
+            { id: 176, name: "盗将行", category: "pop", requestCount: 0 },
+            { id: 177, name: "说爱你", category: "pop", requestCount: 0 },
+            { id: 178, name: "广寒宫", category: "pop", requestCount: 0 },
+            { id: 179, name: "起风了", category: "pop", requestCount: 0 },
+            { id: 180, name: "安和桥", category: "pop", requestCount: 0 },
+            { id: 181, name: "胡广生", category: "pop", requestCount: 0 },
+            { id: 182, name: "醉清风", category: "pop", requestCount: 0 },
+            { id: 183, name: "牵丝戏", category: "pop", requestCount: 0 },
+            { id: 184, name: "雨樱花", category: "pop", requestCount: 0 },
+            { id: 185, name: "舞女泪", category: "pop", requestCount: 0 },
+            { id: 186, name: "追光者", category: "pop", requestCount: 0 },
+            { id: 187, name: "乐游记", category: "pop", requestCount: 0 },
+            { id: 188, name: "清平调", category: "pop", requestCount: 0 },
+            { id: 189, name: "大时代", category: "pop", requestCount: 0 },
+            { id: 190, name: "走天涯", category: "pop", requestCount: 0 },
+            { id: 191, name: "恶作剧", category: "pop", requestCount: 0 },
+            { id: 192, name: "我要你", category: "pop", requestCount: 0 },
+            { id: 193, name: "笑忘书", category: "pop", requestCount: 0 },
+            { id: 194, name: "卡路里", category: "pop", requestCount: 0 },
+            { id: 195, name: "月牙湾", category: "pop", requestCount: 0 },
+            { id: 196, name: "九张机", category: "pop", requestCount: 0 },
+            { id: 197, name: "醉赤壁", category: "pop", requestCount: 0 },
+            { id: 198, name: "红昭愿", category: "pop", requestCount: 0 },
+            { id: 199, name: "讲真的", category: "pop", requestCount: 0 },
+            { id: 200, name: "离人愁", category: "pop", requestCount: 0 },
+            { id: 201, name: "解语花", category: "pop", requestCount: 0 },
+            { id: 202, name: "紫藤花", category: "pop", requestCount: 0 },
+            { id: 203, name: "新地球", category: "pop", requestCount: 0 },
+            { id: 204, name: "回马枪", category: "pop", requestCount: 0 },
+            { id: 205, name: "失语者", category: "pop", requestCount: 0 },
+            { id: 206, name: "半山腰", category: "pop", requestCount: 0 },
+            { id: 207, name: "沈园外", category: "pop", requestCount: 0 },
+            { id: 208, name: "若把你", category: "pop", requestCount: 0 },
+            { id: 209, name: "学不会", category: "pop", requestCount: 0 },
+            { id: 210, name: "茉莉雨", category: "pop", requestCount: 0 },
+            { id: 211, name: "烦恼歌", category: "pop", requestCount: 0 },
+            { id: 212, name: "三国杀", category: "pop", requestCount: 0 },
+            { id: 213, name: "三国恋", category: "pop", requestCount: 0 },
+            { id: 214, name: "不要脸", category: "pop", requestCount: 0 },
+            { id: 215, name: "镜面人", category: "pop", requestCount: 0 },
+            { id: 216, name: "向云端", category: "pop", requestCount: 0 },
+            { id: 217, name: "春三月", category: "pop", requestCount: 0 },
+            { id: 218, name: "凄美的", category: "pop", requestCount: 0 },
+            { id: 219, name: "桃花诺", category: "pop", requestCount: 0 },
+            { id: 220, name: "听风吟", category: "pop", requestCount: 0 },
+            { id: 221, name: "龙卷风", category: "pop", requestCount: 0 },
+            { id: 222, name: "美人鱼", category: "pop", requestCount: 0 },
+            { id: 223, name: "丑八怪", category: "pop", requestCount: 0 },
+            { id: 224, name: "多情种", category: "pop", requestCount: 0 },
+            { id: 225, name: "爱人呢", category: "pop", requestCount: 0 },
+            { id: 226, name: "黑武士", category: "pop", requestCount: 0 },
+            { id: 227, name: "泸沽湖", category: "pop", requestCount: 0 },
+            { id: 228, name: "一剪梅", category: "pop", requestCount: 0 },
+            { id: 229, name: "麻醉师", category: "pop", requestCount: 0 },
+            { id: 230, name: "地球仪", category: "pop", requestCount: 0 },
+            { id: 231, name: "纯妹妹", category: "pop", requestCount: 0 },
+            { id: 232, name: "咸咸的", category: "pop", requestCount: 0 },
+            { id: 233, name: "不想睡", category: "pop", requestCount: 0 },
+            { id: 234, name: "相思垢", category: "pop", requestCount: 0 },
+            { id: 235, name: "大人中", category: "pop", requestCount: 0 },
+            { id: 236, name: "都不懂", category: "pop", requestCount: 0 },
+            { id: 237, name: "小红象", category: "pop", requestCount: 0 },
+            { id: 238, name: "野心家", category: "pop", requestCount: 0 },
+            { id: 239, name: "克卜勒", category: "pop", requestCount: 0 },
+            { id: 240, name: "石头歌", category: "pop", requestCount: 0 },
+            { id: 241, name: "太聪明", category: "pop", requestCount: 0 },
+            { id: 242, name: "叹云兮", category: "pop", requestCount: 0 },
+            { id: 243, name: "尕连手", category: "pop", requestCount: 0 },
+            { id: 244, name: "Radio", category: "pop", requestCount: 0 },
+            { id: 245, name: "走麦田", category: "pop", requestCount: 0 },
+            { id: 246, name: "爱不爱", category: "pop", requestCount: 0 },
+            { id: 247, name: "是风动", category: "pop", requestCount: 0 },
+            { id: 248, name: "关于你", category: "pop", requestCount: 0 },
+            { id: 249, name: "下等马", category: "pop", requestCount: 0 },
+            { id: 250, name: "离人赋", category: "pop", requestCount: 0 },
+            { id: 251, name: "麦恩粒", category: "pop", requestCount: 0 },
+            { id: 252, name: "楚歌起", category: "pop", requestCount: 0 },
+            { id: 253, name: "枫叶城", category: "pop", requestCount: 0 },
+            { id: 254, name: "琴弦上", category: "pop", requestCount: 0 },
+            { id: 255, name: "我的美丽", category: "pop", requestCount: 0 },
+            { id: 256, name: "光的方向", category: "pop", requestCount: 0 },
+            { id: 257, name: "飞鸟和蝉", category: "pop", requestCount: 0 },
+            { id: 258, name: "等你归来", category: "pop", requestCount: 0 },
+            { id: 259, name: "不再联系", category: "pop", requestCount: 0 },
+            { id: 260, name: "特别的人", category: "pop", requestCount: 0 },
+            { id: 261, name: "我本不灭", category: "pop", requestCount: 0 },
+            { id: 262, name: "失恋无罪", category: "pop", requestCount: 0 },
+            { id: 263, name: "边界1999", category: "pop", requestCount: 0 },
+            { id: 264, name: "如初之光", category: "pop", requestCount: 0 },
+            { id: 265, name: "梦的光点", category: "pop", requestCount: 0 },
+            { id: 266, name: "秋殇别恋", category: "pop", requestCount: 0 },
+            { id: 267, name: "修炼爱情", category: "pop", requestCount: 0 },
+            { id: 268, name: "万物生长", category: "pop", requestCount: 0 },
+            { id: 269, name: "潇洒小姐", category: "pop", requestCount: 0 },
+            { id: 270, name: "爱情错觉", category: "pop", requestCount: 0 },
+            { id: 271, name: "即刻出发", category: "pop", requestCount: 0 },
+            { id: 272, name: "夏天的风", category: "pop", requestCount: 0 },
+            { id: 273, name: "不醉不会", category: "pop", requestCount: 0 },
+            { id: 274, name: "匆匆那年", category: "pop", requestCount: 0 },
+            { id: 275, name: "仙人指路", category: "pop", requestCount: 0 },
+            { id: 276, name: "梦醒时分", category: "pop", requestCount: 0 },
+            { id: 277, name: "狂野想乡", category: "pop", requestCount: 0 },
+            { id: 278, name: "再见青春", category: "pop", requestCount: 0 },
+            { id: 279, name: "浮生未歇", category: "pop", requestCount: 0 },
+            { id: 280, name: "清风徐来", category: "pop", requestCount: 0 },
+            { id: 281, name: "大笑江湖", category: "pop", requestCount: 0 },
+            { id: 282, name: "勿忘心安", category: "pop", requestCount: 0 },
+            { id: 283, name: "无愧于心", category: "pop", requestCount: 0 },
+            { id: 284, name: "空空如也", category: "pop", requestCount: 0 },
+            { id: 285, name: "忽然之间", category: "pop", requestCount: 0 },
+            { id: 286, name: "百万个吻", category: "pop", requestCount: 0 },
+            { id: 287, name: "我怀念的", category: "pop", requestCount: 0 },
+            { id: 288, name: "明月天涯", category: "pop", requestCount: 0 },
+            { id: 289, name: "我好想你", category: "pop", requestCount: 0 },
+            { id: 290, name: "爱我别走", category: "pop", requestCount: 0 },
+            { id: 291, name: "兔子先生", category: "pop", requestCount: 0 },
+            { id: 292, name: "像风一样", category: "pop", requestCount: 0 },
+            { id: 293, name: "我们的爱", category: "pop", requestCount: 0 },
+            { id: 294, name: "梦特别矫", category: "pop", requestCount: 0 },
+            { id: 295, name: "路过人间", category: "pop", requestCount: 0 },
+            { id: 296, name: "浪漫血液", category: "pop", requestCount: 0 },
+            { id: 297, name: "不死之身", category: "pop", requestCount: 0 },
+            { id: 298, name: "彩色翅膀", category: "pop", requestCount: 0 },
+            { id: 299, name: "寂寞先生", category: "pop", requestCount: 0 },
+            { id: 300, name: "白色羽毛", category: "pop", requestCount: 0 },
+            { id: 301, name: "屋顶着火", category: "pop", requestCount: 0 },
+            { id: 302, name: "如果的事", category: "pop", requestCount: 0 },
+            { id: 303, name: "作势装腔", category: "pop", requestCount: 0 },
+            { id: 304, name: "连名带姓", category: "pop", requestCount: 0 },
+            { id: 305, name: "最后一页", category: "pop", requestCount: 0 },
+            { id: 306, name: "一荤一素", category: "pop", requestCount: 0 },
+            { id: 307, name: "我的世界", category: "pop", requestCount: 0 },
+            { id: 308, name: "万物起舞", category: "pop", requestCount: 0 },
+            { id: 309, name: "金风玉露", category: "pop", requestCount: 0 },
+            { id: 310, name: "天若有情", category: "pop", requestCount: 0 },
+            { id: 311, name: "梦特别娇", category: "pop", requestCount: 0 },
+            { id: 312, name: "第三人称", category: "pop", requestCount: 0 },
+            { id: 313, name: "漠河舞厅", category: "pop", requestCount: 0 },
+            { id: 314, name: "俩俩相忘", category: "pop", requestCount: 0 },
+            { id: 315, name: "喜剧之王", category: "pop", requestCount: 0 },
+            { id: 316, name: "影子对手", category: "pop", requestCount: 0 },
+            { id: 317, name: "sensitive", category: "pop", requestCount: 0 },
+            { id: 318, name: "泪不停流", category: "pop", requestCount: 0 },
+            { id: 319, name: "爱情讯息", category: "pop", requestCount: 0 },
+            { id: 320, name: "如果可以", category: "pop", requestCount: 0 },
+            { id: 321, name: "西楼儿女", category: "pop", requestCount: 0 },
+            { id: 322, name: "同手同脚", category: "pop", requestCount: 0 },
+            { id: 323, name: "四风判词", category: "pop", requestCount: 0 },
+            { id: 324, name: "昨日青空", category: "pop", requestCount: 0 },
+            { id: 325, name: "春雨夏至", category: "pop", requestCount: 0 },
+            { id: 326, name: "到此为止", category: "pop", requestCount: 0 },
+            { id: 327, name: "没语季节", category: "pop", requestCount: 0 },
+            { id: 328, name: "想要和你", category: "pop", requestCount: 0 },
+            { id: 329, name: "小巷酒馆", category: "pop", requestCount: 0 },
+            { id: 330, name: "月色薄衣", category: "pop", requestCount: 0 },
+            { id: 331, name: "晚点再爱", category: "pop", requestCount: 0 },
+            { id: 332, name: "让她降落", category: "pop", requestCount: 0 },
+            { id: 333, name: "台北车站", category: "pop", requestCount: 0 },
+            { id: 334, name: "额尔古纳", category: "pop", requestCount: 0 },
+            { id: 335, name: "红拂夜奔", category: "pop", requestCount: 0 },
+            { id: 336, name: "龙门客栈", category: "pop", requestCount: 0 },
+            { id: 337, name: "可惜没如果", category: "pop", requestCount: 0 },
+            { id: 338, name: "东京不太热", category: "pop", requestCount: 0 },
+            { id: 339, name: "奇妙能力歌", category: "pop", requestCount: 0 },
+            { id: 340, name: "普通disco", category: "pop", requestCount: 0 },
+            { id: 341, name: "陪我看日出", category: "pop", requestCount: 0 },
+            { id: 342, name: "红色高跟鞋", category: "pop", requestCount: 0 },
+            { id: 343, name: "我最亲爱的", category: "pop", requestCount: 0 },
+            { id: 344, name: "至少还有你", category: "pop", requestCount: 0 },
+            { id: 345, name: "客官不可以", category: "pop", requestCount: 0 },
+            { id: 346, name: "慢慢喜欢你", category: "pop", requestCount: 0 },
+            { id: 347, name: "如果没有你", category: "pop", requestCount: 0 },
+            { id: 348, name: "爱要坦荡荡", category: "pop", requestCount: 0 },
+            { id: 349, name: "最炫民族风", category: "pop", requestCount: 0 },
+            { id: 350, name: "其实都没有", category: "pop", requestCount: 0 },
+            { id: 351, name: "易燃易爆炸", category: "pop", requestCount: 0 },
+            { id: 352, name: "吹灭小山河", category: "pop", requestCount: 0 },
+            { id: 353, name: "最初的梦想", category: "pop", requestCount: 0 },
+            { id: 354, name: "陪你去流浪", category: "pop", requestCount: 0 },
+            { id: 355, name: "爱有路可退", category: "pop", requestCount: 0 },
+            { id: 356, name: "在树上唱歌", category: "pop", requestCount: 0 },
+            { id: 357, name: "被驯服的象", category: "pop", requestCount: 0 },
+            { id: 358, name: "雨季开始了", category: "pop", requestCount: 0 },
+            { id: 359, name: "新娘不是我", category: "pop", requestCount: 0 },
+            { id: 360, name: "山楂树之恋", category: "pop", requestCount: 0 },
+            { id: 361, name: "爱你一万年", category: "pop", requestCount: 0 },
+            { id: 362, name: "伤心太平洋", category: "pop", requestCount: 0 },
+            { id: 363, name: "突然想起你", category: "pop", requestCount: 0 },
+            { id: 364, name: "美丽笨女人", category: "pop", requestCount: 0 },
+            { id: 365, name: "爱的天灵灵", category: "pop", requestCount: 0 },
+            { id: 366, name: "缘分一道桥", category: "pop", requestCount: 0 },
+            { id: 367, name: "坚强的理由", category: "pop", requestCount: 0 },
+            { id: 368, name: "无奈的思绪", category: "pop", requestCount: 0 },
+            { id: 369, name: "我要找到你", category: "pop", requestCount: 0 },
+            { id: 370, name: "别找我麻烦", category: "pop", requestCount: 0 },
+            { id: 371, name: "欠踹的背影", category: "pop", requestCount: 0 },
+            { id: 372, name: "生生世世爱", category: "pop", requestCount: 0 },
+            { id: 373, name: "我的歌声里", category: "pop", requestCount: 0 },
+            { id: 374, name: "诚实的想你", category: "pop", requestCount: 0 },
+            { id: 375, name: "疯狂的阳光", category: "pop", requestCount: 0 },
+            { id: 376, name: "梦到太空外", category: "pop", requestCount: 0 },
+            { id: 377, name: "法兰西多士", category: "pop", requestCount: 0 },
+            { id: 378, name: "三拜红尘凉", category: "pop", requestCount: 0 },
+            { id: 379, name: "爱在西元前", category: "pop", requestCount: 0 },
+            { id: 380, name: "会呼吸的痛", category: "pop", requestCount: 0 },
+            { id: 381, name: "吻得太逼真", category: "pop", requestCount: 0 },
+            { id: 382, name: "生活在别处", category: "pop", requestCount: 0 },
+            { id: 383, name: "想你时风起", category: "pop", requestCount: 0 },
+            { id: 384, name: "怎么唱情歌", category: "pop", requestCount: 0 },
+            { id: 385, name: "眼泪的名字", category: "pop", requestCount: 0 },
+            { id: 386, name: "那时候的我", category: "pop", requestCount: 0 },
+            { id: 387, name: "爱情大魔咒", category: "pop", requestCount: 0 },
+            { id: 388, name: "我叫上官燕", category: "pop", requestCount: 0 },
+            { id: 389, name: "一刹的烟火", category: "pop", requestCount: 0 },
+            { id: 390, name: "最好的时光", category: "pop", requestCount: 0 },
+            { id: 391, name: "亲爱的你啊", category: "pop", requestCount: 0 },
+            { id: 392, name: "霓裳羽衣曲", category: "pop", requestCount: 0 },
+            { id: 393, name: "惜别的海岸", category: "pop", requestCount: 0 },
+            { id: 394, name: "到时说爱我", category: "pop", requestCount: 0 },
+            { id: 395, name: "寂寞的季节", category: "pop", requestCount: 0 },
+            { id: 396, name: "下完这场雨", category: "pop", requestCount: 0 },
+            { id: 397, name: "痴心无名氏", category: "pop", requestCount: 0 },
+            { id: 398, name: "爱x无限大", category: "pop", requestCount: 0 },
+            { id: 399, name: "不浪漫罪名", category: "pop", requestCount: 0 },
+            { id: 400, name: "云裳羽衣曲", category: "pop", requestCount: 0 },
+            { id: 401, name: "荒漠上行走", category: "pop", requestCount: 0 },
+            { id: 402, name: "猫猫静悄悄", category: "pop", requestCount: 0 },
+            { id: 403, name: "思念是一种病", category: "pop", requestCount: 0 },
+            { id: 404, name: "说好的幸福呢", category: "pop", requestCount: 0 },
+            { id: 405, name: "火红的萨日朗", category: "pop", requestCount: 0 },
+            { id: 406, name: "像我这样的人", category: "pop", requestCount: 0 },
+            { id: 407, name: "寂寞的恋人会", category: "pop", requestCount: 0 },
+            { id: 408, name: "化身孤岛的鲸", category: "pop", requestCount: 0 },
+            { id: 409, name: "你还要我怎样", category: "pop", requestCount: 0 },
+            { id: 410, name: "你潇洒我漂亮", category: "pop", requestCount: 0 },
+            { id: 411, name: "粉红色的回忆", category: "pop", requestCount: 0 },
+            { id: 412, name: "最重要的决定", category: "pop", requestCount: 0 },
+            { id: 413, name: "越单纯越幸福", category: "pop", requestCount: 0 },
+            { id: 414, name: "一如少年模样", category: "pop", requestCount: 0 },
+            { id: 415, name: "永不失联的爱", category: "pop", requestCount: 0 },
+            { id: 416, name: "若思念便思念", category: "pop", requestCount: 0 },
+            { id: 417, name: "亲爱的下雨了", category: "pop", requestCount: 0 },
+            { id: 418, name: "写不完的温柔", category: "pop", requestCount: 0 },
+            { id: 419, name: "我是来揍你的", category: "pop", requestCount: 0 },
+            { id: 420, name: "有可能的夜晚", category: "pop", requestCount: 0 },
+            { id: 421, name: "寂寞寂寞不好", category: "pop", requestCount: 0 },
+            { id: 422, name: "云与尘的裂痕", category: "pop", requestCount: 0 },
+            { id: 423, name: "字和句关于你", category: "pop", requestCount: 0 },
+            { id: 424, name: "去有风的地方", category: "pop", requestCount: 0 },
+            { id: 425, name: "我管不住自己", category: "pop", requestCount: 0 },
+            { id: 426, name: "漂洋过海来看你", category: "pop", requestCount: 0 },
+            { id: 427, name: "不为谁而作的歌", category: "pop", requestCount: 0 },
+            { id: 428, name: "负重一万斤长大", category: "pop", requestCount: 0 },
+            { id: 429, name: "挥着翅膀的女孩", category: "pop", requestCount: 0 },
+            { id: 430, name: "一生只能爱一个", category: "pop", requestCount: 0 },
+            { id: 431, name: "我曾遇到一束光", category: "pop", requestCount: 0 },
+            { id: 432, name: "就让这大雨落下", category: "pop", requestCount: 0 },
+            { id: 433, name: "你就不要想起我", category: "pop", requestCount: 0 },
+            { id: 434, name: "因为单身的缘故", category: "pop", requestCount: 0 },
+            { id: 435, name: "爱我不要丢下我", category: "pop", requestCount: 0 },
+            { id: 436, name: "给月亮的三行诗", category: "pop", requestCount: 0 },
+            { id: 437, name: "美人鱼的玻璃鞋", category: "pop", requestCount: 0 },
+            { id: 438, name: "第57次取消发送", category: "pop", requestCount: 0 },
+            { id: 439, name: "给电影人的情书", category: "pop", requestCount: 0 },
+            { id: 440, name: "1987我不知会遇见你", category: "pop", requestCount: 0 },
+            { id: 441, name: "我还年轻我还年轻", category: "pop", requestCount: 0 },
+            { id: 442, name: "亲爱的那不是爱情", category: "pop", requestCount: 0 },
+            { id: 443, name: "你快乐所以我快乐", category: "pop", requestCount: 0 },
+            { id: 444, name: "你知道我害怕一个人天黑", category: "pop", requestCount: 0 },
+            { id: 445, name: "如果我们当时在一起会怎么样", category: "pop", requestCount: 0 },
+            { id: 446, name: "Say You Love Me feat", category: "pop", requestCount: 0 },
+            { id: 447, name: "Tamala", category: "pop", requestCount: 0 },
+            
+            // 说唱分类
+            { id: 448, name: "Burn me down", category: "rap", requestCount: 0 },
+            { id: 449, name: "嘴脸", category: "rap", requestCount: 0 },
+            { id: 450, name: "麒麟", category: "rap", requestCount: 0 },
+            { id: 451, name: "他在乎", category: "rap", requestCount: 0 },
+            { id: 452, name: "帽檐反戴", category: "rap", requestCount: 0 },
+            { id: 453, name: "罗生门", category: "rap", requestCount: 0 },
+            { id: 454, name: "真没睡", category: "rap", requestCount: 0 },
+            { id: 455, name: "电梯战神", category: "rap", requestCount: 0 },
+            { id: 456, name: "北派", category: "rap", requestCount: 0 },
+            { id: 457, name: "圣玛伊伦斯", category: "rap", requestCount: 0 },
+            { id: 458, name: "我的新衣", category: "rap", requestCount: 0 },
+            { id: 459, name: "雪distance", category: "rap", requestCount: 0 },
+            { id: 460, name: "宝贝在干嘛", category: "rap", requestCount: 0 },
+            { id: 461, name: "火棍", category: "rap", requestCount: 0 },
+            { id: 462, name: "小丑女", category: "rap", requestCount: 0 },
+            { id: 463, name: "百变酒精", category: "rap", requestCount: 0 },
+            { id: 464, name: "4u", category: "rap", requestCount: 0 },
+            { id: 465, name: "两难", category: "rap", requestCount: 0 },
+            { id: 466, name: "雀台", category: "rap", requestCount: 0 },
+            
+            // 整活分类
+            { id: 467, name: "逐客令（吹箫版）", category: "special", requestCount: 0 },
+            { id: 468, name: "膨胀", category: "special", requestCount: 0 }
+        ];
+
+        // 模拟点歌记录 - 清空
+        let requestHistory = [];
+
+        // DOM元素
+        const songList = document.getElementById('song-list');
+        const songCount = document.getElementById('song-count');
+        const searchInput = document.getElementById('search-input');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const requestForm = document.getElementById('request-form');
+        const selectedSong = document.getElementById('selected-song');
+        const selectedSongDisplay = document.getElementById('selected-song-display');
+        const submitRequestBtn = document.getElementById('submit-request');
+        const topRequests = document.getElementById('top-requests');
+        const recentRequests = document.getElementById('recent-requests');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const closeModal = document.getElementById('close-modal');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+        // 当前状态
+        let currentCategory = 'all';
+        let filteredSongs = [...allSongs];
+        let selectedSongId = null;
+
+        // 初始化页面
+        function init() {
+            renderSongList();
+            renderTopRequests();
+            renderRecentRequests();
+            createStars();
+            setupEventListeners();
+            setupAnimations();
+        }
+
+        // 渲染歌曲列表
+        function renderSongList() {
+            songList.innerHTML = '';
+            songCount.textContent = filteredSongs.length;
+            
+            filteredSongs.forEach(song => {
+                const songItem = document.createElement('div');
+                songItem.className = `song-item glass rounded-lg p-3 flex items-center justify-between ${selectedSongId === song.id ? 'selected' : ''}`;
+                songItem.dataset.id = song.id;
+                
+                songItem.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fa fa-music text-secondary mr-3"></i>
+                        <span class="text-white">${song.name}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs px-2 py-1 rounded-full ${getCategoryClass(song.category)}">
+                            ${getCategoryName(song.category)}
+                        </span>
+                        <i class="fa fa-chevron-right text-gray-400 ml-3"></i>
+                    </div>
+                `;
+                
+                songItem.addEventListener('click', () => selectSong(song.id));
+                
+                songList.appendChild(songItem);
+            });
+        }
+
+        // 获取分类样式
+        function getCategoryClass(category) {
+            switch(category) {
+                case 'pop': return 'bg-primary bg-opacity-20 text-primary';
+                case 'rap': return 'bg-green-500 bg-opacity-20 text-green-500';
+                case 'special': return 'bg-yellow-500 bg-opacity-20 text-yellow-500';
+                default: return 'bg-gray-500 bg-opacity-20 text-gray-500';
+            }
+        }
+
+        // 获取分类名称
+        function getCategoryName(category) {
+            switch(category) {
+                case 'pop': return '流行';
+                case 'rap': return '说唱';
+                case 'special': return '整活';
+                default: return '其他';
+            }
+        }
+
+        // 选择歌曲
+        function selectSong(id) {
+            selectedSongId = id;
+            const song = allSongs.find(s => s.id === id);
+            selectedSong.value = song.name;
+            selectedSongDisplay.textContent = song.name;
+            selectedSongDisplay.classList.remove('text-gray-500');
+            selectedSongDisplay.classList.add('text-white');
+            submitRequestBtn.disabled = false;
+            
+            // 更新歌曲列表UI
+            document.querySelectorAll('.song-item').forEach(item => {
+                if (parseInt(item.dataset.id) === id) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            
+            // 滚动到点歌区域
+            document.getElementById('request').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 渲染点歌榜
+        function renderTopRequests() {
+            topRequests.innerHTML = '';
+            
+            // 按点歌次数排序
+            const sortedSongs = [...allSongs].sort((a, b) => b.requestCount - a.requestCount).slice(0, 10);
+            
+            if (sortedSongs.length === 0 || sortedSongs[0].requestCount === 0) {
+                topRequests.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fa fa-music text-4xl mb-4"></i>
+                        <p>暂无点歌记录</p>
+                        <p class="text-sm mt-2">成为第一个点歌的粉丝吧！</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            sortedSongs.forEach((song, index) => {
+                const requestItem = document.createElement('div');
+                requestItem.className = `top-song ${index < 3 ? 'top-3' : ''} glass rounded-lg p-4 flex items-center justify-between`;
+                requestItem.dataset.rank = index + 1;
+                
+                requestItem.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="text-white font-bold">${song.name}</span>
+                        <span class="text-xs px-2 py-1 rounded-full ${getCategoryClass(song.category)} ml-3">
+                            ${getCategoryName(song.category)}
+                        </span>
+                    </div>
+                    <div class="flex items-center text-secondary">
+                        <i class="fa fa-star mr-1"></i>
+                        <span>${song.requestCount}</span>
+                    </div>
+                `;
+                
+                requestItem.addEventListener('click', () => selectSong(song.id));
+                
+                topRequests.appendChild(requestItem);
+            });
+        }
+
+        // 渲染最新点歌
+        function renderRecentRequests() {
+            recentRequests.innerHTML = '';
+            
+            if (requestHistory.length === 0) {
+                recentRequests.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fa fa-clock-o text-4xl mb-4"></i>
+                        <p>暂无最新点歌</p>
+                        <p class="text-sm mt-2">快来点一首你喜欢的歌曲吧！</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            requestHistory.forEach(request => {
+                const requestItem = document.createElement('div');
+                requestItem.className = 'request-card glass rounded-lg p-4';
+                
+                requestItem.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="text-white font-bold">${request.songName}</h4>
+                        <span class="text-xs text-gray-400">${request.timestamp}</span>
+                    </div>
+                    ${request.message ? `<p class="text-gray-300 text-sm mb-2">${request.message}</p>` : ''}
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-400">
+                            ${request.requester}
+                        </span>
+                        <button class="text-xs text-secondary hover:text-white transition-colors request-again-btn" data-song="${request.songName}">
+                            <i class="fa fa-refresh mr-1"></i> 再点一次
+                        </button>
+                    </div>
+                `;
+                
+                // 添加再点一次按钮事件
+                const requestAgainBtn = requestItem.querySelector('.request-again-btn');
+                requestAgainBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const songName = e.target.dataset.song;
+                    const song = allSongs.find(s => s.name === songName);
+                    if (song) {
+                        selectSong(song.id);
+                    }
+                });
+                
+                recentRequests.appendChild(requestItem);
+            });
+        }
+
+        // 创建背景星星
+        function createStars() {
+            const starsContainer = document.getElementById('stars-container');
+            const starsCount = 100;
+            
+            for (let i = 0; i < starsCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // 随机大小
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // 随机位置
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // 随机动画延迟
+                star.style.animationDelay = `${Math.random() * 4}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 搜索功能
+            searchInput.addEventListener('input', handleSearch);
+            
+            // 分类筛选
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const category = btn.dataset.category;
+                    setCategory(category);
+                });
+            });
+            
+            // 点歌表单提交
+            requestForm.addEventListener('submit', handleRequestSubmit);
+            
+            // 移动端菜单
+            mobileMenuButton.addEventListener('click', toggleMobileMenu);
+            
+            // 模态框
+            closeModal.addEventListener('click', closeModalFunc);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModalFunc();
+                }
+            });
+            
+            // 导航链接
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = link.getAttribute('href');
+                    scrollToSection(target);
+                    setActiveNavLink(link);
+                });
+            });
+            
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = link.getAttribute('href');
+                    scrollToSection(target);
+                    toggleMobileMenu();
+                });
+            });
+            
+            // 滚动监听
+            window.addEventListener('scroll', handleScroll);
+        }
+
+        // 设置动画
+        function setupAnimations() {
+            // 初始化GSAP
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // 首页动画
+            gsap.from('#home h1', {
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                delay: 0.2
+            });
+            
+            gsap.from('#home p', {
+                opacity: 0,
+                y: 30,
+                duration: 1,
+                delay: 0.4
+            });
+            
+            gsap.from('#home .flex', {
+                opacity: 0,
+                y: 30,
+                duration: 1,
+                delay: 0.6
+            });
+            
+            // 滚动触发动画
+            gsap.utils.toArray('section').forEach(section => {
+                gsap.from(section.querySelector('h2'), {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: 'top 80%'
+                    },
+                    opacity: 0,
+                    y: 50,
+                    duration: 0.8
+                });
+                
+                gsap.from(section.querySelector('p'), {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: 'top 80%'
+                    },
+                    opacity: 0,
+                    y: 30,
+                    duration: 0.8,
+                    delay: 0.2
+                });
+            });
+        }
+
+        // 处理搜索
+        function handleSearch() {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            if (currentCategory === 'all') {
+                filteredSongs = allSongs.filter(song => 
+                    song.name.toLowerCase().includes(searchTerm)
+                );
+            } else {
+                filteredSongs = allSongs.filter(song => 
+                    song.category === currentCategory && 
+                    song.name.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            renderSongList();
+        }
+
+        // 设置分类
+        function setCategory(category) {
+            currentCategory = category;
+            
+            // 更新按钮样式
+            categoryBtns.forEach(btn => {
+                btn.classList.remove('bg-primary');
+                btn.classList.add('bg-gray-800');
+                
+                if (btn.dataset.category === category) {
+                    btn.classList.remove('bg-gray-800');
+                    btn.classList.add('bg-primary');
+                }
+            });
+            
+            // 应用筛选
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            if (category === 'all') {
+                filteredSongs = allSongs.filter(song => 
+                    song.name.toLowerCase().includes(searchTerm)
+                );
+            } else {
+                filteredSongs = allSongs.filter(song => 
+                    song.category === category && 
+                    song.name.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            renderSongList();
+        }
+
+        // 处理点歌表单提交
+        function handleRequestSubmit(e) {
+            e.preventDefault();
+            
+            const songName = selectedSong.value;
+            const message = document.getElementById('request-message').value;
+            
+            if (!songName) {
+                openModal('提交失败', '<p class="text-red-400">请先选择一首歌曲！</p>');
+                return;
+            }
+            
+            // 更新歌曲点歌次数
+            const song = allSongs.find(s => s.name === songName);
+            if (song) {
+                song.requestCount++;
+            }
+            
+            // 创建新的点歌记录
+            const newRequest = {
+                id: requestHistory.length + 1,
+                songName,
+                requester: '热心粉丝',
+                message: message || '',
+                timestamp: new Date().toLocaleString('zh-CN', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit',
+                    hour: '2-digit', 
+                    minute: '2-digit'
+                })
+            };
+            
+            // 添加到点歌历史
+            requestHistory.unshift(newRequest);
+            
+            // 重新渲染点歌榜和最新点歌
+            renderTopRequests();
+            renderRecentRequests();
+            
+            // 重置表单
+            requestForm.reset();
+            selectedSongId = null;
+            selectedSong.value = '';
+            selectedSongDisplay.textContent = '请从歌单中选择歌曲';
+            selectedSongDisplay.classList.remove('text-white');
+            selectedSongDisplay.classList.add('text-gray-500');
+            submitRequestBtn.disabled = true;
+            
+            // 移除歌曲选择状态
+            document.querySelectorAll('.song-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // 显示成功消息
+            openModal('提交成功', '<p class="text-green-400">感谢您的点歌请求！达宝会收到您的支持与爱～</p>');
+        }
+
+        // 切换移动端菜单
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // 打开模态框
+        function openModal(title, content) {
+            modalTitle.textContent = title;
+            modalContent.innerHTML = content;
+            modal.classList.remove('hidden');
+        }
+
+        // 关闭模态框
+        function closeModalFunc() {
+            modal.classList.add('hidden');
+        }
+
+        // 滚动到指定区域
+        function scrollToSection(target) {
+            const element = document.querySelector(target);
+            if (element) {
+                window.scrollTo({
+                    top: element.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // 设置活动导航链接
+        function setActiveNavLink(activeLink) {
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            activeLink.classList.add('active');
+        }
+
+        // 处理滚动事件
+        function handleScroll() {
+            const scrollPosition = window.scrollY;
+            
+            // 更新导航链接状态
+            document.querySelectorAll('section').forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                const sectionBottom = sectionTop + section.offsetHeight;
+                const sectionId = section.getAttribute('id');
+                
+                if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${sectionId}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body></html>
