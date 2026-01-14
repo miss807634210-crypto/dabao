@@ -53,6 +53,11 @@ const searchResultsList = document.getElementById('search-results-list');
 const popularSection = document.getElementById('popular-section');
 const rapSection = document.getElementById('rap-section');
 const funnySection = document.getElementById('funny-section');
+const randomSongBtn = document.getElementById('random-song-btn');
+const randomSongModal = document.getElementById('random-song-modal');
+const modalContent = document.getElementById('modal-content');
+const randomSongName = document.getElementById('random-song-name');
+const confirmRandomSong = document.getElementById('confirm-random-song');
 
 // 初始化页面
 function initPage() {
@@ -67,6 +72,8 @@ function initPage() {
             handleSearch();
         }
     });
+    randomSongBtn.addEventListener('click', handleRandomSong);
+    confirmRandomSong.addEventListener('click', confirmRandomSongClick);
     
     // 实时搜索功能
     songSearch.addEventListener('input', handleRealTimeSearch);
@@ -155,6 +162,57 @@ function showCopyNotification() {
     setTimeout(() => {
         copyNotification.classList.remove('show-notification');
     }, 3000);
+}
+
+// 处理随机点歌
+function handleRandomSong() {
+    // 从所有歌曲中随机选择一首
+    const allSongs = [
+        ...songData.popular.map(song => ({name: song, category: 'popular'})),
+        ...songData.rap.map(song => ({name: song, category: 'rap'})),
+        ...songData.funny.map(song => ({name: song, category: 'funny'}))
+    ];
+    
+    // 去重
+    const uniqueSongs = [];
+    const songNames = new Set();
+    
+    allSongs.forEach(song => {
+        if (!songNames.has(song.name)) {
+            songNames.add(song.name);
+            uniqueSongs.push(song);
+        }
+    });
+    
+    const randomIndex = Math.floor(Math.random() * uniqueSongs.length);
+    const randomSong = uniqueSongs[randomIndex];
+    
+    // 设置随机选中的歌曲名
+    randomSongName.textContent = randomSong.name;
+    
+    // 显示中央弹窗
+    randomSongModal.classList.remove('hidden');
+    // 添加动画效果
+    setTimeout(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+// 确认随机点歌并复制
+function confirmRandomSongClick() {
+    // 获取随机选中的歌曲名
+    const songName = randomSongName.textContent;
+    
+    // 隐藏弹窗
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+        randomSongModal.classList.add('hidden');
+    }, 300);
+    
+    // 复制歌曲名（带前缀）
+    copySongName(songName);
 }
 
 // 处理分类筛选
