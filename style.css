@@ -21,7 +21,6 @@ body.index-page {
     background-repeat: no-repeat;
     background-blend-mode: overlay;
     position: relative;
-    overflow: hidden;
 }
 
 /* 星光闪烁效果 */
