@@ -1,201 +1,584 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
+<html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>达宝歌单 - 虚拟唱见主播</title>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS v3 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- 自定义样式 -->
-    <link rel="stylesheet" href="style.css">
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#EC4899',
+                        accent: '#10B981',
+                        dark: '#1F2937',
+                        light: '#F3F4F6',
+                        overlay: 'rgba(255, 255, 255, 0.8)'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(139, 92, 246, 0.5)' },
+                            '100%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.8), 0 0 30px rgba(236, 72, 153, 0.6)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .text-shadow-lg {
+                text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+            .bg-glass {
+                background: rgba(255, 255, 255, 0.7);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+            .bg-glass-dark {
+                background: rgba(31, 41, 55, 0.8);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+            .star {
+                position: absolute;
+                background-color: white;
+                border-radius: 50%;
+                animation: twinkle var(--duration) ease-in-out infinite;
+            }
+            @keyframes twinkle {
+                0%, 100% { opacity: 0.2; }
+                50% { opacity: 0.8; }
+            }
+            .song-item {
+                transition: all 0.3s ease;
+            }
+            .song-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            }
+            .confetti {
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                background-color: var(--color);
+                border-radius: 50%;
+                animation: confetti-fall var(--duration) linear forwards;
+            }
+            @keyframes confetti-fall {
+                0% {
+                    transform: translateY(-100vh) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-gray-900 to-blue-900 min-h-screen text-white index-page" style="background-image: url('https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/e78c81087ac84ab2bdcf3c462fd940a8.jpg~tplv-a9rns2rl98-24:720:720.image?lk3s=8e244e95&rcl=20260115033610A77ABF8D14ED503D74A6&rrcfp=8a172a1a&x-expires=1769024170&x-signature=UXC4nXfF8YJx33fLp70daCUTyok%3D'); background-size: cover; background-position: center; background-attachment: fixed;">
-    <div class="container mx-auto px-4 py-6 sm:py-8">
-        <!-- 头部区域 -->
-        <header class="flex flex-col md:flex-row items-center justify-between mb-6 sm:mb-8 bg-black bg-opacity-30 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
-            <div class="flex items-center mb-4 md:mb-0">
+<body class="min-h-screen font-sans text-dark overflow-x-hidden">
+    <!-- 背景图 -->
+    <div class="fixed inset-0 z-0">
+        <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/6d9f736e6f664b4a8efabf95f69d2a45.jpg~tplv-a9rns2rl98-24:720:720.image?lk3s=8e244e95&amp;rcl=20260115172833252A61C2E0016D6B344C&amp;rrcfp=8a172a1a&amp;x-expires=1769074113&amp;x-signature=l%2BHkOjzDCuhTyfKtpe7j4dBwzko%3D" alt="达宝背景" class="w-full h-full object-cover">
+    </div>
 
-                
-                <!-- 主播信息 -->
-                <div>
-                    <h1 class="text-2xl sm:text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">达宝</h1>
-                    <div class="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1 text-xs sm:text-sm text-blue-200 mb-2 sm:mb-3">
-                        <p><i class="fa fa-arrows-v mr-1"></i> 身高: 165cm</p>
-                        <p><i class="fa fa-birthday-cake mr-1"></i> 生日: 12月26日</p>
-                        <p><i class="fa fa-map-marker mr-1"></i> 天津</p>
+    <!-- 星空背景 -->
+    <div id="stars-container" class="fixed inset-0 z-0 pointer-events-none"></div>
+
+    <!-- 主内容 -->
+    <div class="relative z-10 min-h-screen flex flex-col">
+        <!-- 头部区域 -->
+        <header class="bg-glass py-6 px-4 md:px-8 shadow-lg">
+            <div class="container mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <!-- 主播信息 -->
+                    <div class="flex items-center mb-4 md:mb-0">
+                        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-4 border-primary animate-float">
+                            <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/6d9f736e6f664b4a8efabf95f69d2a45.jpg~tplv-a9rns2rl98-24:720:720.image?lk3s=8e244e95&amp;rcl=20260115172833252A61C2E0016D6B344C&amp;rrcfp=8a172a1a&amp;x-expires=1769074113&amp;x-signature=l%2BHkOjzDCuhTyfKtpe7j4dBwzko%3D" alt="达宝" class="w-full h-full object-cover">
+                        </div>
+                        <div class="ml-4">
+                            <h1 class="text-2xl md:text-3xl font-bold text-primary text-shadow-lg">达宝</h1>
+                            <p class="text-gray-600 md:text-lg">虚拟唱见主播</p>
+                        </div>
                     </div>
-                    <p class="text-sm sm:text-lg text-blue-100 italic bg-blue-900 bg-opacity-30 px-3 sm:px-4 py-2 rounded-lg border-l-4 border-blue-400">
-                        用歌声传递希望与梦想的虚拟Singer，与你一起创造无限可能！
+
+                    <!-- 直播间跳转按钮 -->
+                    <a href="https://live.bilibili.com/22471764?live_from=81011&amp;spm_id_from=333.1007.top_right_bar_window_history.content.click" target="_blank" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center">
+                        <i class="fa fa-play-circle mr-2"></i>
+                        <span>前往直播间</span>
+                    </a>
+                </div>
+
+                <!-- 通知 -->
+                <div class="mt-6 bg-white bg-opacity-50 p-4 rounded-lg shadow">
+                    <p class="text-gray-700 italic text-center">
+                        达宝只是一个喜欢唱歌的普通人，是你们的支持，让达宝觉得"唱歌"这件事，变得特别有意义。谢谢每一个来过直播间的你，谢谢每一句"好听"，每一个礼物，每一次停留。未来的日子，达宝会继续唱更多好听的歌，也希望你们能在达宝的歌声里，找到一点点治愈和快乐。
                     </p>
                 </div>
             </div>
-            
-            <!-- 直播间跳转按钮 -->
-            <a href="https://live.bilibili.com/22471764?live_from=81011&spm_id_from=333.1007.top_right_bar_window_history.content.click" 
-               target="_blank" 
-               class="w-full sm:w-auto bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30 flex items-center justify-center text-sm sm:text-base">
-                <i class="fa fa-play-circle mr-2"></i>
-                <span>前往直播间</span>
-            </a>
         </header>
-        
+
         <!-- 功能区 -->
-        <div class="bg-black bg-opacity-30 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 backdrop-blur-sm">
-            <div class="flex flex-col md:flex-row gap-4 items-end">
-                <!-- 分类筛选下拉框 -->
-                <div class="w-full">
-                    <label for="category-filter" class="block text-xs sm:text-sm font-medium text-blue-200 mb-2">歌曲分类</label>
-                    <div class="relative">
-                        <select id="category-filter" 
-                                class="w-full bg-gray-800 bg-opacity-70 border border-blue-500 rounded-lg py-2 sm:py-3 px-3 sm:px-4 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base text-white">
-                            <option value="all">全部</option>
-                            <option value="popular">流行</option>
-                            <option value="rap">说唱</option>
-                            <option value="funny">整活</option>
+        <section class="bg-glass py-4 px-4 md:px-8 shadow-md">
+            <div class="container mx-auto">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <!-- 分类筛选 -->
+                    <div class="flex-grow md:flex-grow-0 md:w-1/3">
+                        <select id="category-filter" class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white bg-opacity-80">
+                            <option value="all">全部歌曲</option>
+                            <option value="说唱类">说唱类</option>
+                            <option value="整活类">整活类</option>
+                            <option value="国风古风类">国风古风类</option>
+                            <option value="民谣治愈类">民谣治愈类</option>
+                            <option value="摇滚热血类">摇滚热血类</option>
+                            <option value="流行抒情类">流行抒情类</option>
+                            <option value="甜蜜情歌类">甜蜜情歌类</option>
+                            <option value="伤感虐心类">伤感虐心类</option>
+                            <option value="小众特色类">小众特色类</option>
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-blue-300">
-                            <i class="fa fa-chevron-down"></i>
+                    </div>
+
+                    <!-- 搜索框 -->
+                    <div class="flex-grow">
+                        <div class="flex">
+                            <input type="text" id="search-input" placeholder="搜索歌曲名称..." class="flex-grow p-3 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white bg-opacity-80">
+                            <button id="search-button" class="bg-primary hover:bg-primary/90 text-white px-4 rounded-r-lg transition-colors duration-300">
+                                <i class="fa fa-search"></i>
+                            </button>
                         </div>
                     </div>
-                </div>
-                
-                <!-- 歌名关键字搜索 -->
-                <div class="w-full mt-4 sm:mt-0">
-                    <label for="song-search" class="block text-xs sm:text-sm font-medium text-blue-200 mb-2">歌名搜索</label>
-                    <div class="relative">
-                        <input type="text" 
-                               id="song-search" 
-                               placeholder="输入歌名关键字..." 
-                               class="w-full bg-gray-800 bg-opacity-70 border border-blue-500 rounded-lg py-2 sm:py-3 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base text-white">
-                        <button id="search-button" 
-                                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-md transition-colors">
-                            <i class="fa fa-search"></i>
+
+                    <!-- 随机点歌按钮 -->
+                    <div class="flex-grow md:flex-grow-0 md:w-1/4">
+                        <button id="random-song-button" class="w-full bg-gradient-to-r from-accent to-primary text-white font-bold py-3 px-6 rounded-lg shadow hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                            <i class="fa fa-random mr-2"></i>
+                            <span>随机点歌</span>
                         </button>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <!-- 随机点歌按钮 -->
-                <div class="w-full sm:w-auto">
-                    <button id="random-song-btn" 
-                            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30 flex items-center justify-center text-sm sm:text-base">
-                        <i class="fa fa-random mr-2"></i>
-                        <span>随机点歌</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
         <!-- 歌单展示区 -->
-        <div id="playlist-container">
-            <!-- 使用提示 -->
-            <div class="bg-blue-900 bg-opacity-50 rounded-lg p-4 mb-6 text-center border border-blue-400">
-                <p class="text-blue-100 flex items-center justify-center">
-                    <i class="fa fa-info-circle mr-2 text-blue-300"></i>
-                    <span>点击歌名即可复制文本</span>
-                </p>
-            </div>
-            
-            <!-- 流行歌曲区 -->
-            <div id="popular-section" class="mb-8">
-                <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-red-500 flex items-center justify-center mr-3 shadow-lg shadow-pink-500/30">
-                        <i class="fa fa-music"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-red-400">流行歌曲</h2>
+        <main class="flex-grow py-8 px-4 md:px-8">
+            <div class="container mx-auto">
+                <!-- 使用提示 -->
+                <div class="bg-glass rounded-lg shadow-lg p-4 mb-6 text-center">
+                    <p class="text-lg text-primary font-semibold flex items-center justify-center">
+                        <i class="fa fa-lightbulb-o text-2xl mr-2"></i>
+                        点击歌名即可复制文本，快来点歌吧！
+                    </p>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" id="popular-songs">
-                    <!-- 流行歌曲列表将通过JavaScript动态生成 -->
+                
+                <div id="songlist-container" class="space-y-8">
+                    <!-- 歌单内容将通过JavaScript动态生成 -->
                 </div>
             </div>
-            
-            <!-- 说唱歌曲区 -->
-            <div id="rap-section" class="mb-8">
-                <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/30">
-                        <i class="fa fa-microphone"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">说唱歌曲</h2>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" id="rap-songs">
-                    <!-- 说唱歌曲列表将通过JavaScript动态生成 -->
-                </div>
-            </div>
-            
-            <!-- 整活歌曲区 -->
-            <div id="funny-section" class="mb-8">
-                <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center mr-3 shadow-lg shadow-yellow-500/30">
-                        <i class="fa fa-smile-o"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">整活歌曲</h2>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" id="funny-songs">
-                    <!-- 整活歌曲列表将通过JavaScript动态生成 -->
-                </div>
-            </div>
-            
-            <!-- 搜索结果区 (默认隐藏) -->
-            <div id="search-results" class="mb-8 hidden">
-                <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center mr-3 shadow-lg shadow-green-500/30">
-                        <i class="fa fa-search"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-400">搜索结果</h2>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" id="search-results-list">
-                    <!-- 搜索结果将通过JavaScript动态生成 -->
-                </div>
-            </div>
-        </div>
-        
+        </main>
+
         <!-- 底部区域 -->
-        <footer class="text-center text-xs sm:text-sm text-blue-300 mt-8 sm:mt-12 mb-4">
-            <p>© 2026 达宝歌单 | 虚拟唱见主播</p>
-            <div class="flex justify-center mt-2 space-x-3 sm:space-x-4">
-                <a href="https://live.bilibili.com/22471764?live_from=81011&spm_id_from=333.1007.top_right_bar_window_history.content.click" 
-                   target="_blank" 
-                   class="text-blue-300 hover:text-blue-100 transition-colors">
-                    <i class="fa fa-play-circle"></i> 直播间
-                </a>
-                <span class="text-blue-500">|</span>
-                <a href="#" class="text-blue-300 hover:text-blue-100 transition-colors">
-                    <i class="fa fa-info-circle"></i> 关于
-                </a>
+        <footer class="bg-glass py-4 px-4 md:px-8 shadow-inner">
+            <div class="container mx-auto text-center">
+                <p class="text-gray-600">© 2025 达宝应援会 | 虚拟唱见主播歌单</p>
             </div>
         </footer>
     </div>
-    
-    <!-- 复制成功提示弹窗 -->
-    <div id="copy-notification" class="fixed bottom-6 right-6 bg-green-600 text-white py-3 px-6 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center">
-        <i class="fa fa-check-circle mr-2"></i>
-        <span>已复制当前歌曲，请前往直播间点歌</span>
+
+    <!-- 提示弹窗 -->
+    <div id="toast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-glass-dark text-white p-6 rounded-lg shadow-2xl z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="text-center">
+            <i class="fa fa-check-circle text-4xl text-accent mb-4"></i>
+            <p id="toast-message" class="text-xl font-semibold"></p>
+        </div>
     </div>
 
-    <!-- 随机点歌中央弹窗 -->
-    <div id="random-song-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-        <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
-        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 relative z-10 transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
+    <!-- 随机点歌惊喜弹窗 -->
+    <div id="random-toast" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm"></div>
+        <div class="relative bg-glass-dark text-white p-8 rounded-lg shadow-2xl max-w-md w-full mx-4 animate-glow">
             <div class="text-center">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                    <i class="fa fa-music text-2xl text-white"></i>
+                <div class="inline-block p-4 rounded-full bg-accent bg-opacity-20 mb-4">
+                    <i class="fa fa-gift text-5xl text-accent"></i>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-2">随机点歌</h3>
-                <p class="text-gray-600 mb-4">已为您随机选择一首歌曲：</p>
-                <div class="bg-gray-100 rounded-lg p-4 mb-6">
-                    <p id="random-song-name" class="text-xl font-bold text-purple-600"></p>
-                </div>
-                <button id="confirm-random-song" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
-                    确认并复制
+                <h3 class="text-2xl font-bold mb-2">恭喜你抽中巨好听的歌曲！</h3>
+                <p id="random-song-name" class="text-2xl font-bold text-primary mb-6"></p>
+                <p class="mb-6">已复制歌名，快前往直播间点歌吧！</p>
+                <button id="close-random-toast" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-6 rounded-full transition-colors duration-300">
+                    好的
                 </button>
             </div>
         </div>
     </div>
-    
 
+    <!-- 音频元素 -->
+    <audio id="surprise-audio" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" type="audio/mpeg">
+    </audio>
+
+
+
+<script>
+    // 歌单数据
+    const songData = {
+        "说唱类": ["Burn me down", "嘴脸", "麒麟", "他在乎", "帽檐反戴", "罗生门", "真没睡", "电梯战神", "北派", "圣玛伊伦斯", "我的新衣", "雪 distance", "宝贝在干嘛", "火棍", "小丑女", "百变酒精", "4u", "两难", "雀台"],
+        "整活类": ["逐客令（吹箫版）", "膨胀"],
+        "国风古风类": ["囍", "谪仙", "芊芊", "江南", "丝路", "红颜", "芒种", "红豆", "赤伶", "广寒谣", "寄明月", "童话镇", "鱼玄机", "盗将行", "广寒宫", "牵丝戏", "雨樱花", "清平调", "月牙湾", "九张机", "醉赤壁", "红昭愿", "解语花", "紫藤花", "茉莉雨", "三国杀", "三国恋", "桃花诺", "一剪梅", "琴弦上", "千年", "多情岸", "天下局", "沈园外", "若把你", "清风徐来", "浮生未歇", "金风玉露", "天若有情", "俩俩相忘", "霓裳羽衣曲", "云裳羽衣曲", "三拜红尘凉", "爱在西元前", "惜别的海岸"],
+        "民谣治愈类": ["稻香", "宁夏", "暖暖", "安和桥", "胡广生", "外婆桥", "早春", "春风吹", "麦田", "山川", "额尔古纳", "小巷酒馆", "一荤一素", "飞鸟和蝉", "漠河舞厅", "走天涯", "关于你", "去有风的地方", "我怀念的", "忽然之间", "寂寞的季节", "像风一样", "路过人间"],
+        "摇滚热血类": ["逆战", "齐天", "易燃易爆炸", "野子", "悬溺", "精卫", "空心", "夜车", "楼顶", "黑武士", "达尔文", "即刻出发", "不醉不会", "大笑江湖", "勿忘心安", "空空如也", "不死之身", "放肆", "我是来揍你的", "负重一万斤长大", "挥着翅膀的女孩", "你还要我怎样"],
+        "流行抒情类": ["光", "鱼", "吻", "画", "椿", "火", "当", "爱", "常", "笼", "喂", "啊", "大眠", "箴言", "爱你", "重来", "阴天", "微微", "解药", "流年", "天涯", "飘摇", "大鱼", "祈祷", "倒带", "风月", "千古", "舞娘", "不哭", "叶子", "倾城", "命运", "小小", "火苗", "心跳", "人间", "尽头", "后来", "喜欢", "放过", "成全", "宝贝", "雨蝶", "信仰", "天后", "说谎", "画沙", "心墙", "皈依", "趁早", "演员", "沉溺", "消愁", "月光", "洋葱", "彩虹", "撒野", "年轮", "李白", "答案", "走马", "暧昧", "触电", "囚鸟", "听海", "花火", "纪念", "传奇", "不染", "自洽", "禁区", "Andy", "够爱", "月下", "是你", "再见", "摆渡", "无期", "怀念", "红黑", "人质", "浮白", "假装", "说客", "聊生", "愿望", "杀手", "晚婚", "活该", "爱情", "狐言", "哦想", "问风", "失忆", "不留", "如此", "幻听", "循迹", "你走", "拥抱", "Amen", "离人", "心空", "叮咚", "放开", "用情", "蠢货", "青花", "冻夏", "出卖", "骑士", "岁岁", "怪病", "乐园", "不得", "恋人", "阿妮", "时差", "沟壑", "侧脸", "过客", "对影", "大桥", "纹身", "忧愁", "挚友", "保留", "占有", "戒你", "仗着", "勉强", "棕旨", "窄门", "多嘴", "恰好", "嗵嗵", "太空", "就是我", "小永远", "欧若拉", "万物生", "大丈夫", "起风了", "舞女泪", "追光者", "乐游记", "大时代", "恶作剧", "我要你", "笑忘书", "卡路里", "新地球", "回马枪", "失语者", "半山腰", "学不会", "烦恼歌", "不要脸", "镜面人", "向云端", "春三月", "凄美的", "听风吟", "龙卷风", "美人鱼", "丑八怪", "多情种", "爱人呢", "泸沽湖", "麻醉师", "地球仪", "纯妹妹", "咸咸的", "不想睡", "相思垢", "大人中", "都不懂", "小红象", "野心家", "克卜勒", "石头歌", "太聪明", "叹云兮", "尕连手", "Radio", "爱不爱", "是风动", "下等马", "离人赋", "麦恩粒", "楚歌起", "枫叶城", "我的美丽", "光的方向", "等你归来", "不再联系", "特别的人", "我本不灭", "失恋无罪", "边界 1999", "如初之光", "梦的光点", "秋殇别恋", "修炼爱情", "万物生长", "潇洒小姐", "爱情错觉", "夏天的风", "匆匆那年", "仙人指路", "梦醒时分", "狂野想乡", "再见青春", "无愧于心", "百万个吻", "明月天涯", "我好想你", "爱我别走", "兔子先生", "我们的爱", "梦特别娇", "浪漫血液", "彩色翅膀", "寂寞先生", "白色羽毛", "屋顶着火", "如果的事", "作势装腔", "连名带姓", "最后一页", "我的世界", "万物起舞", "第三人称", "喜剧之王", "影子对手", "sensitive", "泪不停流", "爱情讯息", "如果可以", "西楼儿女", "同手同脚", "四风判词", "昨日青空", "春雨夏至", "到此为止", "没语季节", "想要和你", "月色薄衣", "晚点再爱", "让她降落", "台北车站", "红拂夜奔", "龙门客栈", "可惜没如果", "东京不太热", "奇妙能力歌", "普通 disco", "陪我看日出", "红色高跟鞋", "我最亲爱的", "至少还有你", "客官不可以", "慢慢喜欢你", "如果没有你", "爱要坦荡荡", "最炫民族风", "其实都没有", "吹灭小山河", "最初的梦想", "陪你去流浪", "爱有路可退", "在树上唱歌", "被驯服的象", "雨季开始了", "新娘不是我", "山楂树之恋", "爱你一万年", "伤心太平洋", "突然想起你", "美丽笨女人", "爱的天灵灵", "缘分一道桥", "坚强的理由", "无奈的思绪", "我要找到你", "别找我麻烦", "欠踹的背影", "生生世世爱", "我的歌声里", "诚实的想你", "疯狂的阳光", "梦到太空外", "法兰西多士", "会呼吸的痛", "吻得太逼真", "生活在别处", "想你时风起", "怎么唱情歌", "眼泪的名字", "那时候的我", "爱情大魔咒", "我叫上官燕", "一刹的烟火", "最好的时光", "亲爱的你啊", "到时说爱我", "下完这场雨", "痴心无名氏", "爱 x 无限大", "不浪漫罪名", "荒漠上行走", "猫猫静悄悄", "思念是一种病", "说好的幸福呢", "火红的萨日朗", "像我这样的人", "寂寞的恋人会", "化身孤岛的鲸", "你潇洒我漂亮", "粉红色的回忆", "最重要的决定", "越单纯越幸福", "一如少年模样", "永不失联的爱", "有可能的夜晚", "云与尘的裂痕", "字和句关于你", "我管不住自己", "漂洋过海来看你", "不为谁而作的歌", "一生只能爱一个", "我曾遇到一束光", "就让这大雨落下", "你就不要想起我", "因为单身的缘故", "爱我不要丢下我", "给月亮的三行诗", "美人鱼的玻璃鞋", "第 57 次取消发送", "给电影人的情书", "1987 我不知会遇见你", "我还年轻我还年轻", "亲爱的那不是爱情", "你快乐所以我快乐", "你知道我害怕一个人天黑", "如果我们当时在一起会怎么样", "Say You Love Me feat", " Tamala"],
+        "甜蜜情歌类": ["爱你", "暖暖", "喜欢", "宝贝", "稻香", "小永远", "欧若拉", "恶作剧", "我要你", "卡路里", "讲真的", "夏天的风", "浪漫血液", "如果的事", "慢慢喜欢你", "爱要坦荡荡", "爱的天灵灵", "最重要的决定", "越单纯越幸福", "永不失联的爱", "有可能的夜晚", "漂洋过海来看你", "我最亲爱的", "至少还有你", "客官不可以", "突然想起你", "美丽笨女人", "你潇洒我漂亮", "粉红色的回忆", "你快乐所以我快乐", "Say You Love Me feat", " Tamala"],
+        "伤感虐心类": ["大眠", "阴天", "飘摇", "倒带", "不哭", "尽头", "后来", "放过", "人质", "假装", "晚婚", "活该", "失忆", "你走", "离人", "空心", "心空", "放开", "蠢货", "出卖", "忧愁", "戒你", "窄门", "悬溺", "不留", "幻听", "循迹", "失语者", "半山腰", "凄美地", "听海", "囚鸟", "撒野", "年轮", "说谎", "心墙", "演员", "消愁", "逆流成河", "不再联系", "失恋无罪", "秋殇别恋", "梦醒时分", "再见青春", "浮生未歇", "百万个吻", "明月天涯", "我好想你", "爱我别走", "我们的爱", "连名带姓", "最后一页", "第三人称", "漠河舞厅", "俩俩相忘", "喜剧之王", "泪不停流", "到此为止", "让她降落", "可惜没如果", "其实都没有", "新娘不是我", "伤心太平洋", "坚强的理由", "无奈的思绪", "别找我麻烦", "诚实的想你", "会呼吸的痛", "吻得太逼真", "想你时风起", "眼泪的名字", "爱情大魔咒", "一刹的烟火", "不浪漫罪名", "思念是一种病", "说好的幸福呢", "像我这样的人", "寂寞的恋人会", "化身孤岛的鲸", "你还要我怎样", "你就不要想起我", "因为单身的缘故", "爱我不要丢下我"],
+        "小众特色类": ["自洽", "禁区", "Andy", "嗵嗵", "太空", "鱼玄机", "乐游记", "镜面人", "春三月", "小红象", "克卜勒", "尕连手", "Radio", "麦恩粒", "楚歌起", "枫叶城", "我的美丽", "边界 1999", "如初之光", "梦的光点", "狂野想乡", "空空如也", "奇妙能力歌", "普通 disco", "被驯服的象", "雨季开始了", "法兰西多士", "三拜红尘凉", "荒漠上行走", "猫猫静悄悄", "第 57 次取消发送", "给电影人的情书", "1987 我不知会遇见你", "我还年轻我还年轻", "你知道我害怕一个人天黑", "如果我们当时在一起会怎么样"]
+    };
+
+    // DOM元素
+    const songlistContainer = document.getElementById('songlist-container');
+    const categoryFilter = document.getElementById('category-filter');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    const randomSongButton = document.getElementById('random-song-button');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    const randomToast = document.getElementById('random-toast');
+    const randomSongName = document.getElementById('random-song-name');
+    const closeRandomToast = document.getElementById('close-random-toast');
+    const surpriseAudio = document.getElementById('surprise-audio');
+    const starsContainer = document.getElementById('stars-container');
+
+    // 初始化页面
+    function initPage() {
+        renderSonglist();
+        createStars();
+        setupEventListeners();
+    }
+
+    // 渲染歌单
+    function renderSonglist(filteredData = null) {
+        songlistContainer.innerHTML = '';
+        
+        const dataToRender = filteredData || songData;
+        
+        // 如果是搜索结果，按分类分组显示
+        if (filteredData && Object.keys(filteredData).length > 0) {
+            Object.keys(dataToRender).forEach(category => {
+                if (dataToRender[category].length > 0) {
+                    const categorySection = createCategorySection(category, dataToRender[category]);
+                    songlistContainer.appendChild(categorySection);
+                }
+            });
+        } 
+        // 如果没有搜索结果
+        else if (filteredData && Object.keys(filteredData).length === 0) {
+            const noResultsSection = document.createElement('div');
+            noResultsSection.className = 'text-center py-12';
+            noResultsSection.innerHTML = `
+                <i class="fa fa-search text-4xl text-gray-400 mb-4"></i>
+                <p class="text-xl text-gray-500">没有找到匹配的歌曲</p>
+            `;
+            songlistContainer.appendChild(noResultsSection);
+        }
+        // 默认显示所有歌单
+        else {
+            Object.keys(dataToRender).forEach(category => {
+                const categorySection = createCategorySection(category, dataToRender[category]);
+                songlistContainer.appendChild(categorySection);
+            });
+        }
+    }
+
+    // 创建分类区块
+    function createCategorySection(category, songs) {
+        const section = document.createElement('div');
+        section.className = 'bg-glass rounded-lg shadow-lg p-6';
+        
+        const title = document.createElement('h2');
+        title.className = 'text-2xl font-bold mb-4 text-primary text-shadow';
+        title.textContent = category;
+        
+        const songGrid = document.createElement('div');
+        songGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3';
+        
+        songs.forEach(song => {
+            const songItem = document.createElement('div');
+            songItem.className = 'song-item bg-white bg-opacity-80 rounded-lg p-3 text-center cursor-pointer hover:bg-primary hover:text-white transition-colors duration-300';
+            songItem.textContent = song;
+            songItem.addEventListener('click', () => copySongName(song));
+            songGrid.appendChild(songItem);
+        });
+        
+        section.appendChild(title);
+        section.appendChild(songGrid);
+        
+        return section;
+    }
+
+    // 复制歌名
+    function copySongName(songName) {
+        const textToCopy = `点歌 ${songName}`;
+        
+        // 优先使用现代 Clipboard API
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast(`已复制《${songName}》，快去直播间点歌吧！`);
+            }).catch(err => {
+                console.error('Clipboard API 复制失败:', err);
+                // 失败时尝试备用方法
+                fallbackCopyTextToClipboard(textToCopy, songName);
+            });
+        } else {
+            // 不支持 Clipboard API 或非安全上下文，使用备用方法
+            fallbackCopyTextToClipboard(textToCopy, songName);
+        }
+    }
     
-    <!-- JavaScript -->
-    <script src="script.js"></script>
-</body>
-</html>
+    // 备用复制方法
+    function fallbackCopyTextToClipboard(text, songName) {
+        // 创建临时文本区域
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        
+        // 设置样式使其不可见
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        textArea.style.opacity = '0';
+        textArea.style.pointerEvents = 'none';
+        textArea.style.tabIndex = '-1';
+        textArea.setAttribute('readonly', '');
+        
+        document.body.appendChild(textArea);
+        
+        try {
+            // 选择文本
+            textArea.select();
+            textArea.setSelectionRange(0, text.length); // 移动设备兼容
+            
+            // 执行复制命令
+            const successful = document.execCommand('copy');
+            
+            if (successful) {
+                showToast(`已复制《${songName}》，快去直播间点歌吧！`);
+            } else {
+                throw new Error('复制命令执行失败');
+            }
+        } catch (err) {
+            console.error('备用复制方法失败:', err);
+            showToast('复制失败，请手动复制', true);
+        } finally {
+            // 清理临时元素
+            document.body.removeChild(textArea);
+        }
+    }
+
+    // 显示提示弹窗
+    function showToast(message, isError = false) {
+        toastMessage.textContent = message;
+        toast.classList.remove('hidden');
+        
+        // 添加错误样式
+        if (isError) {
+            toast.classList.add('border-red-500');
+            toast.querySelector('i').classList.remove('text-accent');
+            toast.querySelector('i').classList.add('text-red-500');
+        } else {
+            toast.classList.remove('border-red-500');
+            toast.querySelector('i').classList.add('text-accent');
+            toast.querySelector('i').classList.remove('text-red-500');
+        }
+        
+        // 淡入效果
+        setTimeout(() => {
+            toast.classList.add('opacity-100');
+        }, 10);
+        
+        // 3秒后淡出
+        setTimeout(() => {
+            toast.classList.remove('opacity-100');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 300);
+        }, 3000);
+    }
+
+    // 随机选择歌曲
+    function getRandomSong() {
+        const selectedCategory = categoryFilter.value;
+        let availableSongs = [];
+        
+        if (selectedCategory === 'all') {
+            // 从所有类别中选择
+            Object.keys(songData).forEach(category => {
+                songData[category].forEach(song => {
+                    availableSongs.push({ name: song, category: category });
+                });
+            });
+        } else {
+            // 从选定类别中选择
+            songData[selectedCategory].forEach(song => {
+                availableSongs.push({ name: song, category: selectedCategory });
+            });
+        }
+        
+        if (availableSongs.length > 0) {
+            const randomIndex = Math.floor(Math.random() * availableSongs.length);
+            return availableSongs[randomIndex];
+        }
+        
+        return null;
+    }
+
+    // 显示随机点歌弹窗
+    function showRandomSongPopup() {
+        const randomSong = getRandomSong();
+        
+        if (randomSong) {
+            randomSongName.textContent = randomSong.name;
+            
+            // 播放惊喜音效
+            surpriseAudio.currentTime = 0;
+            surpriseAudio.play().catch(err => console.log('无法播放音频:', err));
+            
+            // 显示弹窗
+            randomToast.classList.remove('hidden');
+            
+            // 创建庆祝效果
+            createConfetti();
+            
+            // 复制歌名
+            copySongName(randomSong.name);
+        }
+    }
+
+    // 创建庆祝效果
+    function createConfetti() {
+        const colors = ['#8B5CF6', '#EC4899', '#10B981', '#F59E0B', '#3B82F6'];
+        const container = document.createElement('div');
+        container.className = 'fixed inset-0 pointer-events-none z-50';
+        document.body.appendChild(container);
+        
+        for (let i = 0; i < 100; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+            confetti.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+            confetti.style.left = `${Math.random() * 100}%`;
+            confetti.style.animationDelay = `${Math.random() * 2}s`;
+            container.appendChild(confetti);
+        }
+        
+        // 3秒后移除
+        setTimeout(() => {
+            container.remove();
+        }, 5000);
+    }
+
+    // 创建星空背景
+    function createStars() {
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            // 随机大小
+            const size = Math.random() * 3 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            
+            // 随机位置
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            
+            // 随机动画持续时间
+            star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+            
+            starsContainer.appendChild(star);
+        }
+    }
+
+    // 筛选歌单
+    function filterSongs() {
+        const category = categoryFilter.value;
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        
+        // 如果没有搜索词，按分类筛选
+        if (!searchTerm) {
+            if (category === 'all') {
+                renderSonglist();
+            } else {
+                const filteredData = {};
+                filteredData[category] = songData[category];
+                renderSonglist(filteredData);
+            }
+            return;
+        }
+        
+        // 如果有搜索词，进行搜索
+        const searchResults = {};
+        
+        Object.keys(songData).forEach(category => {
+            const matchedSongs = songData[category].filter(song => 
+                song.toLowerCase().includes(searchTerm)
+            );
+            
+            if (matchedSongs.length > 0) {
+                // 如果选择了特定分类，只显示该分类的结果
+                if (category === category || categoryFilter.value === 'all') {
+                    searchResults[category] = matchedSongs;
+                }
+            }
+        });
+        
+        renderSonglist(searchResults);
+    }
+
+    // 设置事件监听器
+    function setupEventListeners() {
+        // 分类筛选
+        categoryFilter.addEventListener('change', filterSongs);
+        
+        // 搜索按钮
+        searchButton.addEventListener('click', filterSongs);
+        
+        // 搜索框回车
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                filterSongs();
+            }
+        });
+        
+        // 随机点歌按钮
+        randomSongButton.addEventListener('click', showRandomSongPopup);
+        
+        // 关闭随机点歌弹窗
+        closeRandomToast.addEventListener('click', () => {
+            randomToast.classList.add('hidden');
+            surpriseAudio.pause();
+        });
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', initPage);
+</script></body></html>
