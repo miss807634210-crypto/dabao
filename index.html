@@ -136,7 +136,7 @@
                 <!-- 通知 -->
                 <div class="mt-6 bg-white bg-opacity-50 p-4 rounded-lg shadow">
                     <p class="text-gray-700 italic text-center">
-                        达宝只是一个喜欢唱歌的普通人，是你们的支持，让达宝觉得"唱歌"这件事，变得特别有意义。谢谢每一个来过直播间的你，谢谢每一句"好听"，每一个礼物，每一次停留。未来的日子，达宝会继续唱更多好听的歌，也希望你们能在达宝的歌声里，找到一点点治愈和快乐。
+                        达宝只是一个喜欢唱歌的普通人，是你们的支持，让达宝觉得唱歌这件事，变得特别有意义。谢谢每一个来过直播间的你，谢谢每一句好听，每一个礼物，每一次停留。未来的日子，达宝会继续唱更多好听的歌，也希望你们能在达宝的歌声里，找到一点点治愈和快乐。
                     </p>
                 </div>
             </div>
@@ -174,7 +174,7 @@
 
                     <!-- 随机点歌按钮 -->
                     <div class="flex-grow md:flex-grow-0 md:w-1/4">
-                        <button id="random-song-button" class="w-full bg-gradient-to-r from-accent to-primary text-white font-bold py-3 px-6 rounded-lg shadow hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        <button id="random-song-button" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                             <i class="fa fa-random mr-2"></i>
                             <span>随机点歌</span>
                         </button>
@@ -203,7 +203,7 @@
         <!-- 底部区域 -->
         <footer class="bg-glass py-4 px-4 md:px-8 shadow-inner">
             <div class="container mx-auto text-center">
-                <p class="text-gray-600">© 2025 达宝应援会 | 虚拟唱见主播歌单</p>
+                <p class="text-gray-600">© 2026 达宝应援会 | 达宝的歌单</p>
             </div>
         </footer>
     </div>
@@ -216,6 +216,11 @@
         </div>
     </div>
 
+    <!-- 返回顶端按钮 -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-purple-600 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 z-40 hover:bg-purple-700">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
     <!-- 随机点歌惊喜弹窗 -->
     <div id="random-toast" class="fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm"></div>
@@ -225,10 +230,10 @@
                     <i class="fa fa-gift text-5xl text-accent"></i>
                 </div>
                 <h3 class="text-2xl font-bold mb-2">恭喜你抽中巨好听的歌曲！</h3>
-                <p id="random-song-name" class="text-2xl font-bold text-primary mb-6"></p>
+                <p id="random-song-name" class="text-2xl font-bold text-primary mb-6" style="color: rgb(245, 232, 91);">戒你</p>
                 <p class="mb-6">已复制歌名，快前往直播间点歌吧！</p>
                 <button id="close-random-toast" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-6 rounded-full transition-colors duration-300">
-                    好的
+                    太棒啦
                 </button>
             </div>
         </div>
@@ -554,20 +559,42 @@
         renderSonglist(searchResults);
     }
 
+    // 返回顶端功能
+    function setupBackToTop() {
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.remove('opacity-100', 'visible');
+                backToTopButton.classList.add('opacity-0', 'invisible');
+            }
+        });
+        
+        // 点击返回顶端
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
     // 设置事件监听器
     function setupEventListeners() {
+        // 初始化返回顶端功能
+        setupBackToTop();
         // 分类筛选
         categoryFilter.addEventListener('change', filterSongs);
         
         // 搜索按钮
         searchButton.addEventListener('click', filterSongs);
         
-        // 搜索框回车
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                filterSongs();
-            }
-        });
+        // 搜索框实时搜索
+        searchInput.addEventListener('input', filterSongs);
         
         // 随机点歌按钮
         randomSongButton.addEventListener('click', showRandomSongPopup);
